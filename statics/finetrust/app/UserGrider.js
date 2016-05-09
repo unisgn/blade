@@ -1,7 +1,7 @@
 /**
  * Created by 0xFranCiS on Apr 26, 2015.
  */
-;Ext.define('Finetrust.apps.UserHub',  {
+;Ext.define('Finetrust.app.UserGrider',  {
     extend: 'Beaux.Application',
     
     statics: {
@@ -10,12 +10,11 @@
             if (me.xwindow) {
                 me.xwindow.toFront();
             } else {
-                me.xwindow = Ext.create('Finetrust.lib.user.UserHub', cfg);
+                me.xwindow = Ext.create('Finetrust.view.user.Grider');
                 me.xwindow.on({
-                    beforedestory: function () {
+                    destroy: function () {
                         me.xwindow = undefined;
-                    },
-                    scope: me
+                    }
                 });
                 me.xwindow.show();
             }

@@ -15,6 +15,7 @@ from http import HTTPStatus
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+import demjson
 
 HTTP_STATUSES = {
     100: ''
@@ -103,7 +104,11 @@ class Request:
         self._environ = environ
         self._cookies = {}
         self._body = None
-        self._json = {}
+        self._json = None
+
+    @property
+    def json(self):
+        return demjson.encode(self.body)
 
     @property
     def body(self):

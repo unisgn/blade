@@ -6,9 +6,9 @@ from web import WSGI
 
 import routes
 
-app = WSGI()
+wsgi = WSGI()
 
 if __name__ == '__main__':
-    app.run('0.0.0.0')
+    wsgi.run('0.0.0.0')
 else:
-    applicaton = app.get_wsgi()
+    app = wsgi.get_wsgi()

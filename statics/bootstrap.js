@@ -9,7 +9,7 @@ Ext.Loader.setConfig({
 });
 
 
-Ext.Loader.loadScript('beaux/boot/override/override.js');
+// Ext.Loader.loadScript('beaux/boot/override/override.js');
 
 Ext.Loader.loadScript('beaux/Beaux.js');
 

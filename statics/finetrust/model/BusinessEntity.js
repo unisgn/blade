@@ -2,7 +2,7 @@
  * Created by 0xFranCiS on Mar 23, 2015..
  */
 ;Ext.define('Finetrust.model.BusinessEntity', {
-    extend: 'Finetrust.model.AbstractEntity',
+    extend: 'Finetrust.model.BaseEntity',
     fields:[
         {name:'number',     type:'string'},
         {name:'code',       type:'string'},

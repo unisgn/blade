@@ -5,6 +5,7 @@
 from web import ctx, route, restful, intercept
 from security import secured
 
+from models import *
 
 @route('/login/<name>')
 @restful
@@ -22,33 +23,35 @@ def logout():
 @route('/user')
 @restful
 def get_users():
-    pass
+    return User.load_all()
 
 
 
 @restful
 @route('/user', method='post')
-@secured('user_mgr')
+# @secured('user_mgr')
 def add_user():
-    pass
+    User.from_vo(ctx.request.json).save()
 
 
 @route('/user/<id>')
-@secured('user_mgr')
+# @secured('user_mgr')
+@restful
 def get_user(id):
-    return 'Nice Try, %s' % id
+    return User.load(id)
 
 
 @secured('user_mgr')
 @route('/user/<id>', method='put')
 def update_user(id):
-    pass
+    User.from_vo(ctx.request.json).save()
 
 
 @secured('user_mgr')
 @route('/user/<id>', method='delete')
 def remove_user(id):
-    pass
+    User.remove(id)
+
 
 
 @route('/download/<path_id>')

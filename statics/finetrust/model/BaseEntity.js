@@ -8,11 +8,11 @@
         return 0; // a new id
     }
 });
-Ext.define('Finetrust.model.AbstractEntity', {
+Ext.define('Finetrust.model.BaseEntity', {
     extend: 'Ext.data.Model',
     fields:[
-        {name:'createdDate', type:'int', defaultValue: Date.now()},
-        {name:'lastModifiedDate', type:'int', defaultValue: Date.now()},
+        // {name:'createdDate', type:'int', defaultValue: Date.now()},
+        // {name:'lastModifiedDate', type:'int', defaultValue: Date.now()},
         {name:'version', type:'int'},
         {name:'archived', type:'boolean', defaultValue:false},
         {name:'active', type:'boolean', defaultValue: true}
