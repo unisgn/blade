@@ -1,47 +1,25 @@
 /**
  * Created by 0xFranCiS on Mar 23, 2015..
  */
-;Ext.define('Finetrust.apps.ProjectHub', {
+;Ext.define('Finetrust.app.ProjectHub', {
     extend:'Beaux.Application',
+    
+    requires: [
+        'Finetrust.view.project.BasicGrid'
+    ],
+    
     statics:{
-        launch: function (cfg) {
-            var me = this;
-            if (me.instance) {
-                me.instance.xwindow.toFront();
-            } else {
-                me.instance = new this(cfg);
-                me.instance.xwindow.show();
-            }
+        mapper: {
+            basic: 'Finetrust.view.project.BasicGrid'
         },
-        instance: undefined
-    },
+        launch: function (cfg) {
+            var mycfg = {
+                mode: 'basic'
+            }, me = this;
+            Ext.apply(mycfg, cfg);
 
-    /**
-     * @type {Finetrust.lib.projectHub.XWindow}
-     */
-    xwindow: undefined,
-
-    constructor: function (cfg) {
-        var me = this;
-        me.initXWindow(cfg);
-        me.callParent(cfg);
-    },
-
-    initXWindow: function (cfg) {
-        var me = this;
-        me.xwindow = Ext.create('Finetrust.lib.projectHub.XWindow', cfg);
-        me.xwindow.on({
-            destroy: function () {
-                me.fireEvent('terminate');
-            },
-            scope: me
-        });
-    },
-
-    terminate: function () {
-        var me = this;
-        me.callParent();
-        me.self.instance = undefined;
-        //TODO implement destroy xwindow
+            me.mapper[mycfg.mode] && Ext.create(me.mapper[mycfg.mode]).show();
+        }
     }
+
 });

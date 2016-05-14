@@ -15,7 +15,9 @@ from http import HTTPStatus
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+from util import jsonify
 import demjson
+import cgi
 
 HTTP_STATUSES = {
     100: ''
@@ -102,24 +104,27 @@ class HTTPError(Exception):
 class Request:
     def __init__(self, environ):
         self._environ = environ
-        self._cookies = {}
-        self._body = None
-        self._json = None
 
     @property
     def json(self):
-        return demjson.encode(self.body)
+        if not hasattr(self, '_json'):
+            if self.body:
+                self._json = demjson.decode(self.body)
+            else:
+                self._json = None
+        return self._json
 
     @property
     def body(self):
-        if self._body:
-            return self._body
-        try:
-            length = int(self._environ.get('CONTENT_LENGTH', '0'))
-        except ValueError:
-            length = 0
-        if length > 0:
-            self._body = self._environ['wsgi.input'].read(length)
+        if not hasattr(self, '_body'):
+            try:
+                length = int(self._environ.get('CONTENT_LENGTH', '0'))
+            except ValueError:
+                length = 0
+            if length > 0:
+                self._body = self._environ['wsgi.input'].read(length)
+            else:
+                self._body = None
         return self._body
 
     @property
@@ -136,24 +141,39 @@ class Request:
 
     @property
     def cookies(self):
-        if self._cookies:
-            return self._cookies
-        if 'HTTP_COOKIE' in self._environ:
-            for _cookie in self._environ['HTTP_COOKIE'].split(';'):
-                if 'DELETED' in _cookie:
-                    continue
-                name, val = _cookie.strip().split('=', 1)
-                self._cookies[name] = val
-            return self._cookies
-
-        return {}
+        if not hasattr(self, '_cookies'):
+            cks = {}
+            if 'HTTP_COOKIE' in self._environ:
+                for _cookie in self._environ['HTTP_COOKIE'].split(';'):
+                    if 'DELETED' in _cookie:
+                        continue
+                    name, val = _cookie.strip().split('=', 1)
+                    cks[name] = val
+            self._cookies = cks
+        return self._cookies
 
     def cookie(self, name):
-        return self.cookies.get(name)
+        return self.cookies.get(name, None)
 
     @property
     def environ(self):
         return self._environ
+
+    @property
+    def raw_input(self):
+        if not hasattr(self, '_raw_input'):
+            fs = cgi.FieldStorage(fp=self._environ['wsgi.input'], environ=self._environ, keep_blank_values=True)
+            ret = {}
+            for fname in fs:
+                ret[fname] = fs[fname].value
+            self._raw_input = ret
+        return self._raw_input
+
+    def input(self, key):
+        return self.raw_input.get(key, None)
+
+    def __getitem__(self, item):
+        return self.raw_input[item]
 
 
 class Response:
@@ -256,6 +276,9 @@ class Routine:
 
     def match(self, url):
         m = re.match(self._re_url, url)
+        if m:
+            groups = m.groups()
+
         return m.groups() if m else None
 
 
@@ -306,9 +329,10 @@ class Router:
                     variables = routine.match(path)
                     if variables:
                         handler, args = routine.handler, variables
+                        break
         if handler:
             if args:
-                return handler(args)
+                return handler(*args)
             else:
                 return handler()
         else:
@@ -381,7 +405,24 @@ def restful(fn):
     @functools.wraps(fn)
     def d(*args, **kwargs):
         ctx.response.content_type = 'application/json'
-        return fn(*args, **kwargs)
+        ret = {
+            'msg': 'ok',
+            'success': True,
+            'data': None
+        }
+        try:
+            content = fn(*args, **kwargs)
+            ret['data'] = content
+        except Exception as e:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            fp = StringIO()
+            traceback.print_exception(exc_type, exc_value, exc_traceback, file=fp)
+            stacks = fp.getvalue()
+            print(stacks)
+            fp.close()
+            ret['success'] = False
+            ret['data'] = stacks
+        return jsonify(ret)
     return d
 
 
@@ -461,7 +502,9 @@ class WSGI:
                     traceback.print_exception(exc_type, exc_value, exc_traceback, file=fp)
                     stacks = fp.getvalue()
                     fp.close()
+                    print(stacks)
                     start_response(HTTPError(HTTPStatus.INTERNAL_SERVER_ERROR).status, resp.headers)
+
                     return [
                         r'''<html><body><h1>500 Internal Server Error</h1><div style="font-family:Monaco, Menlo, Consolas, 'Courier New', monospace;"><pre>'''.encode(),
                         stacks.replace('<', '&lt;').replace('>', '&gt;').encode(),

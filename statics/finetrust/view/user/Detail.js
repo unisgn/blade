@@ -3,21 +3,19 @@
  */
 
 Ext.define('Finetrust.view.user.Detail', {
-    extend: 'Beaux.desktop.XWindow',
+    extend: 'Finetrust.view.ModelDetail',
 
-    requires: ['Finetrust.controller.User'],
+    requires: [
+        'Finetrust.controller.UserDetail',
+        'Finetrust.model.User'
+    ],
 
-    controller: 'user',
-
-    readonly: false,
-
-    viewModel: Ext.create('Ext.app.ViewModel', {
-        data: Ext.create('Finetrust.model.User')
-    }),
-
+    controller: 'user-detail',
+    
     bind: {
-        title: '{username}'
+        title: '{data.username}'
     },
+    
 
     items: {
         xtype: 'form',
@@ -28,33 +26,12 @@ Ext.define('Finetrust.view.user.Detail', {
         items: [{
             fieldLabel: 'username',
             name: 'username',
-            bind: '{username}'
+            bind: '{data.username}'
+        },{
+            fieldLabel: 'password',
+            name: 'password',
+            bind: '{data.password}'
         }]
-    },
-
-    initComponent: function () {
-        var me = this;
-        if (!me.readonly) {
-            me.fbar = ['->', {
-                type: 'button',
-                text: 'RESET'
-            }, {
-                type: 'button',
-                text: 'SAVE',
-                listeners: {
-                    click: 'on_save'
-                }
-            }, {
-                type: 'button',
-                text: 'SAVE&NEW'
-            }];
-        }
-        me.items['defaults']['readOnly'] = me.readonly;
-        me.callParent();
-    },
-
-    beforeclose: function () {
-        //TODO: unsaved alert implement
-        this.callParent();
     }
+    
 });

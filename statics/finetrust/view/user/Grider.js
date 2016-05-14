@@ -9,22 +9,28 @@ Ext.define('Finetrust.view.user.Grider', {
 
     requires: [
         'Finetrust.view.ModelGrider',
-        'Finetrust.model.User'
+        'Finetrust.model.User',
+        'Finetrust.controller.UserGrid'
     ],
+
+
 
     items: {
         xtype: 'model-grid',
         queryPanel: Ext.create('Finetrust.view.user.QueryPanel'),
+        controller: 'user-grid',
         store: {
-            model: 'Finetrust.model.User'
+            model: 'Finetrust.model.User',
+            autoLoad: true,
+            remoteFilter: true
         },
         columns: [{
             text: 'Username',
             dataIndex: 'username'
-        },{
+        }, {
             text: 'Password',
             dataIndex: 'password'
         }]
     }
-    
+
 });

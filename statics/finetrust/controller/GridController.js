@@ -4,154 +4,84 @@
 
 Ext.define('Finetrust.controller.GridController', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.gridcontroller',
+    alias: 'controller.grid-controller',
+    
 
-
-    /**
-     * stores all the context menu
-     * and remember to destroy all the menus after the component is destroyed
-     * @type {Ext.util.HashMap}
-     */
-    menus: Ext.create('Ext.util.HashMap'),
-
-    /**
-     * create an {@link Ext.KeyMap} for this component
-     * just one KeyMap instance is enough
-     * init the keymap in initComponent method will failed, reason unknown.
-     * so just init the keymap after the component is rendered
-     * and if you pass the component Object to the KeyMap's target will also fail,
-     * so just pass the el (obtained by the return of getEl())
-     * or id (obtained by the return of getId()) of the component
-     * to the KeyMap's target
-     * and remember to destroy the keymap after the component is destroyed.
-     * @type {Ext.KeyMap}
-     */
-    keymap: undefined,
-
-    init: function () {
-        var users = [
-            {id: 1, username: 'fran', password: '0010'},
-            {id:2, username: 'jane', password: '0010'},
-            {id:3,username: 'kane', password: '0010'},
-            {id:4,username: 'peter', password: '0010'}
-        ];
-        this.getView().getStore().add(users);
-        // console.log(this);
-    },
+    // init: function () {
+    //     var users = [
+    //         {id: 1, username: 'fran', password: '0010'},
+    //         {id:2, username: 'jane', password: '0010'},
+    //         {id:3,username: 'kane', password: '0010'},
+    //         {id:4,username: 'peter', password: '0010'}
+    //     ];
+    //     this.getView().getStore().add(users);
+    //     // console.log(this);
+    // },
 
 
     on_itemcontextmenu: function (dom, record, item, idx, e) {
-        var me = this,
-            menuId = 'item',
-            menu;
-        if (!me.menus.get(menuId)) {
-            menu = Ext.create('Ext.menu.Menu', {
-                items: [{
-                    text: '新建',
-                    handler: function () {
-                        me.launch_entity_detail();
-                    }
-                }, {
-                    text: '查看',
-                    handler: function () {
-                        me.launch_entity_detail({
-                            readonly: true,
-                            viewModel: record
-                        });
-                    }
-                }, {
-                    text: '编辑',
-                    handler: function () {
-                        me.launch_entity_detail({
-                            viewModel: record
-                        });
-                    }
-                }, {
-                    text: '删除',
-                    handler: function () {
-                        record.drop(); //
-                    }
-                }]
-            });
-            me.menus.add(menu);
-        } else {
-            menu = me.menus.get(menuId);
-        }
-        menu.showAt(e.getXY());
+        var view = this.getView();
+        e.stopEvent();
+        view.getItemContextMenu().showAt(e.getXY());
+        return false;
     },
+   
 
-    on_itemdblclick: function (dom, record) {
-        this.launch_entity_detail(record);
+    on_itemdblclick: function (dom, record, item, idx, e) {
+        e.stopEvent();
+        this.launch_detail(record.getId(), true);
+        return false;
     },
 
     on_containercontextmenu: function (dom, e) {
-        var me = this,
-            menuId = 'container',
-            menu;
-        if (!me.menus.get(menuId)) {
-            menu = Ext.create('Ext.menu.Menu', {
-                items:[{
-                    text:'新建',
-                    handler: function () {
-                        me.launch_entity_detail();
-                    }
-                }]
+        var view = this.getView();
+        e.stopEvent();
+        view.getContainerContextMenu().showAt(e.getXY());
+        return false;
+    },
+    
+
+    // implemented by subclass
+    launch_detail: function (id, readonly) {
+        var me = this, view = me.getView(), detailApp = view.getDetailApp();
+        if (detailApp) {
+            Beaux.launch(detailApp, {
+                id: id,
+                readonly: readonly
             });
-            me.menus.add(menu);
-        } else {
-            menu = me.menus.get(menuId);
         }
-        menu.showAt(e.getXY());
-    },
-
-    on_afterrender: function () {
-        var me = this, view = me.getView();
-
-        if (view.queryPanel) {
-            if (me.keymap) {
-                me.keymap.addBinding({
-                    key: 's',
-                    shift: true,
-                    handler: me.launch_query_panel,
-                    scope: me
-                });
-            } else {
-                me.keymap = Ext.create('Ext.KeyMap', {
-                    target: view.getEl(),
-                    binding: [{
-                        key: 's',
-                        shift: true,
-                        handler: me.launch_query_panel,
-                        scope: me
-                    }]
-                });
-            }
-        }
-    },
-
-    destroy: function () {
-        var me = this;
-        me.keymap && me.keymap.destroy();
-
-        me.menus.each(function (key, val, len) {
-            val.destroy();
-        });
-
-        me.callParent();
-
-    },
-
-    launch_entity_detail: function (cfg) {
-
+        
     },
 
     launch_query_panel: function () {
-        this.getView().queryPanel.show();
+        var p = this.getView().getQueryPanel();
+        p.show && p.show();
+    },
+    
+    remove_entity: function(record) {
+        var me = this;
+        record.erase({
+            callback: function () {
+                me.getView().getStore().reload();
+            }
+        });
     },
 
     on_criteria_ready: function () {
-        var me = this, view = me.getView(),data=view.getQueryPanel().getViewModel().data;
-        console.log(data);
+        var me = this, view = me.getView(), store = view.getStore(), filters = view.getQueryPanel().getFilters();
+        store.clearFilter(true);
+
+        if (filters.length > 0) {
+            store.setFilters(filters);
+        } else {
+            store.reload();
+        }
+        // store.reload(); // already auto loaded
+        
+    },
+    
+    refresh_page: function () {
+        this.getView().getStore().reload();
     }
 
 });

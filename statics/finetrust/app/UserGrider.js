@@ -3,6 +3,10 @@
  */
 ;Ext.define('Finetrust.app.UserGrider',  {
     extend: 'Beaux.Application',
+
+    requires: [
+        'Finetrust.view.user.Grider'
+    ],
     
     statics: {
         launch: function (cfg) {

@@ -5,6 +5,7 @@
     extend:'Finetrust.model.BaseEntity',
     fields:[
         {name:'username', type:'string'},
-        {name:'password', type:'string'}
+        {name:'password', type:'string'},
+        {name:'alias', type: 'string' }
     ]
 });

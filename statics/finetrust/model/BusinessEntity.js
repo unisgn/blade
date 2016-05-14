@@ -9,6 +9,6 @@
         {name:'name',       type:'string'},
         {name:'alias',      type:'string'},
         {name:'brief',      type:'string'},
-        {name:'searchText', type:'string'}
+        {name:'search_field', type:'string'}
     ]
 });

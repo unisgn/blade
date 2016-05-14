@@ -6,6 +6,11 @@ from web import WSGI
 
 import routes
 
+
+from dbx import engine
+from models import Base
+Base.metadata.create_all(engine)
+
 wsgi = WSGI()
 
 if __name__ == '__main__':
