@@ -5,12 +5,23 @@
     extend:'Beaux.Application',
     
     requires: [
-        'Finetrust.view.project.BasicGrid'
+        'Finetrust.view.project.BasicGrid',
+        'Finetrust.view.project.EssentialGrid',
+        'Finetrust.view.project.OnlineGrid',
+        'Finetrust.view.project.OperatorsGrid'
     ],
     
     statics:{
         mapper: {
-            basic: 'Finetrust.view.project.BasicGrid'
+            basic: 'Finetrust.view.project.BasicGrid',
+            essential: 'Finetrust.view.project.EssentialGrid',
+            online: 'Finetrust.view.project.OnlineGrid',
+            operators: 'Finetrust.view.project.OperatorsGrid',
+            operation: 'Finetrust.view.project.OperationGrid',
+            accounts: 'Finetrust.view.project.AccountsGrid',
+            supervise: 'Finetrust.view.project.SuperviseGrid',
+            archive: 'Finetrust.view.project.ArchiveGrid'
+
         },
         launch: function (cfg) {
             var mycfg = {

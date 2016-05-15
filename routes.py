@@ -186,7 +186,55 @@ def update_project(id):
             return po.__json__()
 
 
+@route('/api/Project/<id>/accounts')
+@restful
+def get_project_accounts(id):
+    with open_session() as s:
+        rs = s.query(ProjectAccount).filter(ProjectAccount.project_id == id).all()
+        return [e.__json__() for e in rs]
 
+
+@route('/api/Project/<id>/accounts', method='post')
+@restful
+def add_project_account(id):
+    with open_session() as s:
+        vo = ctx.request.json
+        po = ProjectAccount()
+        po.update_vo(vo)
+        po.project_id = id
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+
+@route('/api/Project/<id>/accounts/<sid>', method='put')
+@restful
+def update_project_account(id, sid):
+    with open_session() as s:
+        vo = ctx.request.json
+        po = s.query(ProjectAccount).filter(ProjectAccount.id == sid).filter(ProjectAccount.project_id == id).one()
+        if po:
+            po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+@route('/api/Project/<id>/accounts/<sid>', method='delete')
+@restful
+def remove_project_account(id, sid):
+    with open_session() as s:
+        po = s.query(ProjectAccount).filter(ProjectAccount.id == sid).filter(ProjectAccount.project_id == id).one()
+        if po:
+            s.delete(po)
+
+
+@route('/api/Project/<id>/supervise_issues')
+@restful
+def get_project_supervise_issues(id):
+    with open_session() as s:
+        rs = s.query(SuperviseIssue).filter(SuperviseIssue.project_id == id).all()
+        return [e.__json__() for e in rs]
 
 
 @route('/api/data/project/basic')
@@ -197,11 +245,60 @@ def get_project_basic():
         return [e.__json__() for e in rs]
 
 
+@route('/api/data/project/essential')
+@restful
+def get_project_essential():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
 
 
+@route('/api/data/project/online')
+@restful
+def get_project_essential():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
 
 
+@route('/api/data/project/operators')
+@restful
+def get_project_essential():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
 
+
+@route('/api/data/project/operation')
+@restful
+def get_project_essential():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/data/project/accounts')
+@restful
+def get_project_essential():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/data/project/supervise')
+@restful
+def get_project_essential():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/data/project/archive')
+@restful
+def get_project_essential():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
 
 
 

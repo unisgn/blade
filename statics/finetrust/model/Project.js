@@ -3,10 +3,13 @@
  */
 ;Ext.define('Finetrust.model.Project', {
     extend: 'Finetrust.model.BusinessEntity',
+    requires: [
+        'Finetrust.data.Dict'
+    ],
     fields:[
-        {name:'proj_type', type:'int'},
-        {name:'proj_status', type: 'int'},
-        {name: 'category_id', type: 'string'},
+        {name: 'proj_type', type:'int'},
+        {name: 'proj_status', type: 'int'},
+        {name: 'category_id', type: 'string', allowNull: true},
         {name: 'contract_no', type: 'string'},
         {name: 'contract_status', type: 'int'},
         {name: 'proj_mgr', type: 'string'},
@@ -16,11 +19,11 @@
         {name: 'period', type: 'int'},
         {name: 'estimate_setup_date', type: 'date'},
         {name: 'setup_date', type:'date'},
-        {name: 'create_date', type:'date', persist: false},
+        {name: 'create_date', type:'date', dateFormat: 'timestamp'},
         {name: 'proj_status', type:'int', persist: false},
-        {name: 'intro_org_id', type:'string'},
-        {name: 'op_org_id', type:'string'},
-        {name: 'spv_org_id', type:'string'},
+        {name: 'intro_org_id', type:'string', allowNull: true},
+        {name: 'op_org_id', type:'string', allowNull: true},
+        {name: 'spv_org_id', type:'string', allowNull: true},
         {name: 'online_date', type:'date'},
         {name: 'online_scale', type:'number'},
         {name: 'online_memo', type:'string'},

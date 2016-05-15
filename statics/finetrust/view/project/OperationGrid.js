@@ -1,25 +1,26 @@
 /**
  * Created by 0xFranCiS on May 14, 2016.
  */
-Ext.define('Finetrust.view.project.BasicGrid', {
+Ext.define('Finetrust.view.project.OperationGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
         'Finetrust.view.ModelGrider',
-        'Finetrust.model.Project'
+        'Finetrust.model.Project',
+        'Finetrust.data.Dict'
     ],
 
-    title: '项目立项',
+    title: '运营要素审核',
 
 
     items: {
         xtype: 'model-grid',
-        detailApp: 'Finetrust.app.ProjectBasicDetail',
+        detailApp: 'Finetrust.app.ProjectOperationDetail',
         store: {
             model: 'Finetrust.model.Project',
             autoLoad: true,
             proxy: {
-                url: '../api/data/project/basic',
+                url: '../api/data/project/operation',
                 type:'ajax',
                 reader: {
                     rootProperty: 'data',
@@ -33,15 +34,9 @@ Ext.define('Finetrust.view.project.BasicGrid', {
         }, {
             text: 'Name',
             dataIndex: 'name'
-        }, {
-            text: 'Type',
-            dataIndex: 'proj_type',
-            renderer: function (val) {
-                return Finetrust.data.Dict.get('project_type')[val]['text']
-            }
         },{
-            text: '创建日期',
-            dataIndex: 'create_date'
+            text: 'Type',
+            dataIndex: 'proj_type'
         }]
 
     }

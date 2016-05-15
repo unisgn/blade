@@ -3,7 +3,7 @@
  */
 
 
-Ext.define('Finetrust.view.project.BasicDetail', {
+Ext.define('Finetrust.view.project.OperatorsDetail', {
     extend: 'Finetrust.view.ModelDetail',
     
     requires: [
@@ -19,15 +19,26 @@ Ext.define('Finetrust.view.project.BasicDetail', {
         items: [{
             fieldLabel: 'Number',
             name: 'number',
-            bind: '{data.number}'
+            bind: '{data.number}',
+            readOnly: true
         }, {
             fieldLabel: 'Code',
             name: 'code',
-            bind: '{data.code}'
-        },{
+            bind: '{data.code}',
+            readOnly: true
+        }, {
             fieldLabel: 'Name',
             name: 'name',
-            bind: '{data.name}'
+            bind: '{data.name}',
+            readOnly: true
+        }, {
+            fieldLabel: '帐套',
+            name: 'acct_num',
+            bind: '{data.acct_num}'
+        },{
+            fieldLabel: '资产代码',
+            name: 'asset_code',
+            bind: '{data.asset_code}',
         }]
     }
 });

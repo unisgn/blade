@@ -1,7 +1,7 @@
 /**
  * Created by 0xFranCiS on May 14, 2016.
  */
-Ext.define('Finetrust.view.project.BasicGrid', {
+Ext.define('Finetrust.view.project.OperatorsGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
@@ -9,17 +9,17 @@ Ext.define('Finetrust.view.project.BasicGrid', {
         'Finetrust.model.Project'
     ],
 
-    title: '项目立项',
+    title: '权限分配',
 
 
     items: {
         xtype: 'model-grid',
-        detailApp: 'Finetrust.app.ProjectBasicDetail',
+        detailApp: 'Finetrust.app.ProjectOperatorsDetail',
         store: {
             model: 'Finetrust.model.Project',
             autoLoad: true,
             proxy: {
-                url: '../api/data/project/basic',
+                url: '../api/data/project/operators',
                 type:'ajax',
                 reader: {
                     rootProperty: 'data',
@@ -34,14 +34,11 @@ Ext.define('Finetrust.view.project.BasicGrid', {
             text: 'Name',
             dataIndex: 'name'
         }, {
-            text: 'Type',
-            dataIndex: 'proj_type',
-            renderer: function (val) {
-                return Finetrust.data.Dict.get('project_type')[val]['text']
-            }
+            text: '帐套',
+            dataIndex: 'acct_num'
         },{
-            text: '创建日期',
-            dataIndex: 'create_date'
+            text: '资产代码',
+            dataIndex: 'asset_code'
         }]
 
     }

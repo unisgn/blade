@@ -268,7 +268,7 @@ class Routine:
             self.url_variables else None
 
     def _build_url_pattern(self, url_expr):
-        return '^' + re.sub(self._RE_URL_PATTERN, '(?P<\\1>[^/]+)', url_expr)
+        return '^' + re.sub(self._RE_URL_PATTERN, '(?P<\\1>[^/]+)', url_expr) + '$'
 
     def _parse_path_variables(self, url_expr):
         m = re.match(self._RE_URL_VARIABLE, url_expr)
