@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="ext-5.1.0" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$USER_HOME$/public_html/ext-5.1.0" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$USER_HOME$/public_html/ext-5.1.0" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>
