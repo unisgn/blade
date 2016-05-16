@@ -5,7 +5,7 @@ Ext.define('Finetrust.view.project.SuperviseGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.ModelGrider',
+        'Finetrust.view.EntityGrid',
         'Finetrust.model.Project',
         'Finetrust.data.Dict',
         'Finetrust.model.ProjectSuperviseIssue'
@@ -15,7 +15,7 @@ Ext.define('Finetrust.view.project.SuperviseGrid', {
 
 
     items: {
-        xtype: 'model-grid',
+        xtype: 'entity-grid',
         detailApp: 'Finetrust.app.ProjectSuperviseDetail',
         store: {
             model: 'Finetrust.model.Project',

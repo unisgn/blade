@@ -5,16 +5,18 @@ Ext.define('Finetrust.view.project.EssentialGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.ModelGrider',
+        'Ext.data.proxy.Ajax',
+        'Ext.data.reader.Json',
+        'Finetrust.data.Dict',
         'Finetrust.model.Project',
-        'Finetrust.data.Dict'
+        'Finetrust.view.EntityGrid'
     ],
 
     title: '市场要素',
 
 
     items: {
-        xtype: 'model-grid',
+        xtype: 'entity-grid',
         detailApp: 'Finetrust.app.ProjectEssentialDetail',
         store: {
             model: 'Finetrust.model.Project',

@@ -3,14 +3,18 @@
  */
 
 Ext.define('Finetrust.view.productCategory.Detail', {
-    extend: 'Finetrust.view.ModelDetail',
-    
+    extend: 'Finetrust.view.EntityDetail',
+
     requires: [
-        'Finetrust.controller.DetailController',
+        'Ext.data.Store',
+        'Ext.data.proxy.Ajax',
+        'Ext.data.reader.Json',
+        'Ext.form.Panel',
+        'Ext.form.field.ComboBox',
         'Finetrust.model.ProductCategory'
     ],
-    
-    controller: 'detail-controller',
+
+    controller: 'entity-detail',
     
     items: {
         xtype: 'form',

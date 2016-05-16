@@ -4,10 +4,10 @@
 
 Ext.define('Finetrust.app.UserDetail', {
     extend: 'Beaux.Application',
-    
+
     requires: [
-        'Finetrust.view.user.Detail',
-        'Finetrust.model.User'
+        'Ext.app.ViewModel',
+        'Finetrust.view.user.Detail'
     ],
 
     statics: {

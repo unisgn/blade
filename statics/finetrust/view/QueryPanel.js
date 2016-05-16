@@ -5,6 +5,10 @@ Ext.define('Finetrust.view.QueryPanel', {
 
     extend: 'Beaux.desktop.XWindow',
 
+    requires: [
+        'Ext.button.Button'
+    ],
+
     // closable: false,
     closeAction: 'hide',
 

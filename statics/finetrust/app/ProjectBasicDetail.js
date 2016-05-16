@@ -4,9 +4,10 @@
 Ext.define('Finetrust.app.ProjectBasicDetail', {
     extend: 'Beaux.Application',
 
-    requqires: [
-        'Finetrust.view.project.BasicDetail',
-        'Finetrust.model.Project'
+    requires: [
+        'Ext.app.ViewModel',
+        'Finetrust.model.Project',
+        'Finetrust.view.project.BasicDetail'
     ],
 
     statics: {

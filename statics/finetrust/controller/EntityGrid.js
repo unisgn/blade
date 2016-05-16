@@ -2,9 +2,9 @@
  * Created by 0xFranCiS on May 09, 2016.
  */
 
-Ext.define('Finetrust.controller.GridController', {
+Ext.define('Finetrust.controller.EntityGrid', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.grid-controller',
+    alias: 'controller.entity-grid',
     
 
     // init: function () {

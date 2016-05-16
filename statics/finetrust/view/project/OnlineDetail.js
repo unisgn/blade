@@ -4,7 +4,7 @@
 
 
 Ext.define('Finetrust.view.project.OnlineDetail', {
-    extend: 'Finetrust.view.ModelDetail',
+    extend: 'Finetrust.view.EntityDetail',
     
     requires: [
         'Finetrust.model.Project'

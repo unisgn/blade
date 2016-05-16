@@ -4,21 +4,20 @@
 
 
 Ext.define('Finetrust.view.project.SuperviseDetail', {
-    extend: 'Finetrust.view.ModelDetail',
+    extend: 'Finetrust.view.EntityDetail',
 
     requires: [
+        'Ext.data.Store',
+        'Ext.form.Panel',
         'Finetrust.model.ProjectSuperviseIssue',
-        'Finetrust.model.Project',
-        'Finetrust.view.ModelGrider',
-        'Finetrust.app.ProjectSuperviseIssueDetail'
-
+        'Finetrust.view.EntityGrid'
     ],
 
     bind: {
         title: '监督事项@{data.name}'
     },
 
-    initComponent: function () {
+    initComponent: function (args) {
         var me = this;
         me.items = [{
             xtype: 'form',
@@ -50,7 +49,7 @@ Ext.define('Finetrust.view.project.SuperviseDetail', {
                 name: 'asset_code',
                 bind: '{data.asset_code}'
             }]
-        }, Ext.create('Finetrust.view.ModelGrider', {
+        }, Ext.create('Finetrust.view.EntityGrid', {
             detailApp: 'Finetrust.app.ProjectSuperviseIssueDetail',
             store: Ext.create('Ext.data.Store', {
                 model: 'Finetrust.model.ProjectSuperviseIssue',
@@ -69,6 +68,6 @@ Ext.define('Finetrust.view.project.SuperviseDetail', {
         })
         ];
 
-        me.callParent();
+        me.callParent(args);
     }
 });

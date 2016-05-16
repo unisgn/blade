@@ -3,11 +3,11 @@
  */
 
 Ext.define('Finetrust.view.user.Detail', {
-    extend: 'Finetrust.view.ModelDetail',
+    extend: 'Finetrust.view.EntityDetail',
 
     requires: [
-        'Finetrust.controller.UserDetail',
-        'Finetrust.model.User'
+        'Ext.form.Panel',
+        'Finetrust.controller.UserDetail'
     ],
 
     controller: 'user-detail',

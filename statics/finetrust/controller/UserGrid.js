@@ -3,7 +3,7 @@
  */
 
 Ext.define('Finetrust.controller.UserGrid', {
-    extend: 'Finetrust.controller.GridController',
+    extend: 'Finetrust.controller.EntityGrid',
 
     alias: 'controller.user-grid',
     

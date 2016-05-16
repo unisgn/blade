@@ -5,11 +5,15 @@
 Ext.define('Finetrust.app.ProjectSuperviseDetail', {
     extend: 'Beaux.Application',
 
-    requqires: [
-        'Finetrust.view.project.SuperviseDetail',
-        'Finetrust.model.Project',
-        'Finetrust.model.ProjectSuperviseIssue'
+    requires: [
+        'Ext.app.ViewModel',
+        'Ext.data.proxy.Rest',
+        'Ext.data.reader.Json',
+        'Finetrust.model.ProjectSuperviseIssue',
+        'Finetrust.view.project.SuperviseDetail'
     ],
+
+
 
     statics: {
         launch: function (cfg) {

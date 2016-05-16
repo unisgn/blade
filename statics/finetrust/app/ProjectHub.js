@@ -8,7 +8,11 @@
         'Finetrust.view.project.BasicGrid',
         'Finetrust.view.project.EssentialGrid',
         'Finetrust.view.project.OnlineGrid',
-        'Finetrust.view.project.OperatorsGrid'
+        'Finetrust.view.project.OperatorsGrid',
+        'Finetrust.view.project.OperationGrid',
+        'Finetrust.view.project.AccountsGrid',
+        'Finetrust.view.project.SuperviseGrid',
+        'Finetrust.view.project.ArchiveGrid'
     ],
     
     statics:{

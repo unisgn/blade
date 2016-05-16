@@ -5,12 +5,12 @@
 
 Ext.define('Finetrust.view.project.AccountsDetail', {
     extend: 'Beaux.desktop.XWindow',
-    
+
     requires: [
-        'Finetrust.model.Project',
+        'Ext.data.Store',
+        'Finetrust.app.ProjectAccountItemDetail',
         'Finetrust.model.ProjectAccount',
-        'Finetrust.view.ModelGrider',
-        'Finetrust.app.ProjectAccountItemDetail'
+        'Finetrust.view.EntityGrid'
     ],
 
     bind: {
@@ -25,7 +25,7 @@ Ext.define('Finetrust.view.project.AccountsDetail', {
         var me = this,
             url = me.restUrl;
         
-        me.items = Ext.create('Finetrust.view.ModelGrider', {
+        me.items = Ext.create('Finetrust.view.EntityGrid', {
             detailApp: 'Finetrust.app.ProjectAccountItemDetail',
             store: Ext.create('Ext.data.Store', {
                 model: 'Finetrust.model.ProjectAccount',

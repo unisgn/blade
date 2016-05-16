@@ -5,9 +5,11 @@
 Ext.define('Finetrust.model.PrimeEntity', {
     extend: 'Ext.data.Model',
     requires: [
-        'Ext.data.identifier.Uuid'
+        'Ext.data.identifier.Uuid',
+        'Ext.data.proxy.Rest',
+        'Ext.data.reader.Json'
     ],
-    
+
     fields: [
         {name:'version', type:'int'}
     ],

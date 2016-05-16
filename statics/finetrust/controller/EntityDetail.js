@@ -2,13 +2,13 @@
  * Created by 0xFranCiS on May 09, 2016.
  */
 
-Ext.define('Finetrust.controller.DetailController', {
+Ext.define('Finetrust.controller.EntityDetail', {
     extend: 'Ext.app.ViewController',
-    alias: 'controller.detail-controller',
+    alias: 'controller.entity-detail',
 
     on_btn_reset: function () {
         var me = this;
-        vm = me.getViewModel();
+        var vm = me.getViewModel();
         vm.setLinks(vm.getInitialConfig().links);
     },
 
@@ -31,7 +31,7 @@ Ext.define('Finetrust.controller.DetailController', {
             callback: function (record, op, success) {
                 view.setLoading(false);
 
-                links = {
+                var links = {
                     data: {
                         type: initLinks.links.data.type,
                         create: true

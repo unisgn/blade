@@ -5,16 +5,19 @@
  * input: store, display fields ( and width), filter fields (and group fields)
  * output: the grid (fancy infinite style), and a filter/grouping sub panel
  */
-;Ext.define('Finetrust.view.ModelGrider', {
+;Ext.define('Finetrust.view.EntityGrid', {
     extend: 'Ext.grid.Panel',
 
-    xtype: 'model-grid',
+    xtype: 'entity-grid',
 
     requires: [
-        'Finetrust.controller.GridController'
+        'Ext.menu.Menu',
+        'Ext.menu.Separator',
+        'Ext.util.HashMap',
+        'Finetrust.controller.EntityGrid'
     ],
 
-    controller: 'grid-controller',
+    controller: 'entity-grid',
 
     listeners: {
         itemcontextmenu: 'on_itemcontextmenu',

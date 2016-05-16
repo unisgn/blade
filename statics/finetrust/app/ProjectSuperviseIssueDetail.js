@@ -4,7 +4,7 @@
 Ext.define('Finetrust.app.ProjectSuperviseIssueDetail', {
     extend: 'Beaux.Application',
 
-    requqires: [
+    requires: [
         'Finetrust.view.project.SuperviseIssueDetail',
         'Finetrust.model.ProjectSuperviseIssue'
     ],

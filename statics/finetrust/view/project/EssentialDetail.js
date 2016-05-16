@@ -4,13 +4,15 @@
 
 
 Ext.define('Finetrust.view.project.EssentialDetail', {
-    extend: 'Finetrust.view.ModelDetail',
-    
+    extend: 'Finetrust.view.EntityDetail',
+
     requires: [
-        'Finetrust.model.Project',
+        'Ext.form.Panel',
+        'Ext.form.field.ComboBox',
+        'Ext.form.field.Date',
         'Finetrust.data.Dict'
     ],
-    
+
     items: {
         xtype: 'form',
         defaultType: 'textfield',

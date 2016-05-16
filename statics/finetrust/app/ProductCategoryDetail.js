@@ -2,10 +2,10 @@
 Ext.define('Finetrust.app.ProductCategoryDetail', {
     extend: 'Beaux.Application',
     requires: [
-        'Finetrust.view.productCategory.Detail',
-        'Finetrust.model.ProductCategory'
+        'Ext.app.ViewModel',
+        'Finetrust.view.productCategory.Detail'
     ],
-    
+
     statics: {
         launch: function (cfg) {
             var links = {

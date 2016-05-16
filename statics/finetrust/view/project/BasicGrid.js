@@ -5,15 +5,18 @@ Ext.define('Finetrust.view.project.BasicGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.ModelGrider',
-        'Finetrust.model.Project'
+        'Ext.data.proxy.Ajax',
+        'Ext.data.reader.Json',
+        'Finetrust.data.Dict',
+        'Finetrust.model.Project',
+        'Finetrust.view.EntityGrid'
     ],
 
     title: '项目立项',
 
 
     items: {
-        xtype: 'model-grid',
+        xtype: 'entity-grid',
         detailApp: 'Finetrust.app.ProjectBasicDetail',
         store: {
             model: 'Finetrust.model.Project',

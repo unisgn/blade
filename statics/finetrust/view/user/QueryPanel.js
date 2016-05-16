@@ -5,6 +5,11 @@
 Ext.define('Finetrust.view.user.QueryPanel', {
     extend: 'Finetrust.view.QueryPanel',
 
+    requires: [
+        'Ext.form.Panel',
+        'Ext.util.Filter'
+    ],
+
 
     width: 480,
     height: 360,

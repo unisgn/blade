@@ -4,7 +4,7 @@
 
 
 Ext.define('Finetrust.view.project.AccountItemDetail', {
-    extend: 'Finetrust.view.ModelDetail',
+    extend: 'Finetrust.view.EntityDetail',
 
     requires: [
         'Finetrust.model.ProjectAccount'

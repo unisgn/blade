@@ -8,15 +8,16 @@ Ext.define('Finetrust.view.user.Grider', {
     layout: 'fit',
 
     requires: [
-        'Finetrust.view.ModelGrider',
+        'Ext.layout.container.Fit',
+        'Finetrust.controller.UserGrid',
         'Finetrust.model.User',
-        'Finetrust.controller.UserGrid'
+        'Finetrust.view.EntityGrid',
+        'Finetrust.view.user.QueryPanel'
     ],
 
 
-
     items: {
-        xtype: 'model-grid',
+        xtype: 'entity-grid',
         queryPanel: Ext.create('Finetrust.view.user.QueryPanel'),
         controller: 'user-grid',
         store: {

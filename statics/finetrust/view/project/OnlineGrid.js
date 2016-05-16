@@ -5,7 +5,7 @@ Ext.define('Finetrust.view.project.OnlineGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.ModelGrider',
+        'Finetrust.view.EntityGrid',
         'Finetrust.model.Project',
         'Finetrust.data.Dict'
     ],
@@ -14,7 +14,7 @@ Ext.define('Finetrust.view.project.OnlineGrid', {
 
 
     items: {
-        xtype: 'model-grid',
+        xtype: 'entity-grid',
         detailApp: 'Finetrust.app.ProjectOnlineDetail',
         store: {
             model: 'Finetrust.model.Project',

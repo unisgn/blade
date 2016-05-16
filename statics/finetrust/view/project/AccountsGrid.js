@@ -5,17 +5,19 @@ Ext.define('Finetrust.view.project.AccountsGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.ModelGrider',
-        'Finetrust.model.Project',
+        'Ext.data.proxy.Ajax',
+        'Ext.data.reader.Json',
         'Finetrust.data.Dict',
-        'Finetrust.model.ProjectAccount'
+        'Finetrust.model.Project',
+        'Finetrust.model.ProjectAccount',
+        'Finetrust.view.EntityGrid'
     ],
 
     title: '项目账户',
 
 
     items: {
-        xtype: 'model-grid',
+        xtype: 'entity-grid',
         detailApp: 'Finetrust.app.ProjectAccountsDetail',
         store: {
             model: 'Finetrust.model.Project',

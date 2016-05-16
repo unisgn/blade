@@ -7,14 +7,16 @@
  * the detail card layout (as it is difficult to auto layout the fields) should be implemented by concrete entity
  */
 ;
-Ext.define('Finetrust.view.ModelDetail', {
+Ext.define('Finetrust.view.EntityDetail', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.controller.DetailController'
+        'Ext.button.Button',
+        'Ext.layout.container.Fit',
+        'Finetrust.controller.EntityDetail'
     ],
 
-    controller: 'detail-controller',
+    controller: 'entity-detail',
 
     layout: 'fit',
 

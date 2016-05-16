@@ -3,7 +3,7 @@
  */
 
 Ext.define('Finetrust.controller.UserDetail', {
-    extend: 'Finetrust.controller.DetailController',
+    extend: 'Finetrust.controller.EntityDetail',
     alias: 'controller.user-detail',
 
     on_btn_save: function () {

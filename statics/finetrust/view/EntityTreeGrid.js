@@ -1,15 +1,18 @@
 /**
  * Created by 0xFranCiS on May 13, 2016.
  */
-;Ext.define('Finetrust.view.TreeGrid', {
+;Ext.define('Finetrust.view.EntityTreeGrid', {
     extend: 'Ext.tree.Panel',
 
 
     requires: [
-        'Finetrust.controller.GridController'
+        'Ext.menu.Menu',
+        'Ext.menu.Separator',
+        'Ext.util.HashMap',
+        'Finetrust.controller.EntityGrid'
     ],
 
-    controller: 'grid-controller',
+    controller: 'entity-grid',
 
     listeners: {
         itemcontextmenu: 'on_itemcontextmenu',

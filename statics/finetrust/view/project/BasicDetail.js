@@ -3,12 +3,13 @@
  */
 
 Ext.define('Finetrust.view.project.BasicDetail', {
-    extend: 'Finetrust.view.ModelDetail',
-    
+    extend: 'Finetrust.view.EntityDetail',
+
     requires: [
-        'Finetrust.model.Project'
+        'Ext.form.Panel',
+        'Ext.form.field.Date'
     ],
-    
+
     items: {
         xtype: 'form',
         defaultType: 'textfield',

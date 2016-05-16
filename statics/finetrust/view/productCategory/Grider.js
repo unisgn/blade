@@ -6,12 +6,16 @@ Ext.define('Finetrust.view.productCategory.Grider', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.TreeGrid',
-        'Finetrust.model.ProductCategory'
+        'Ext.data.TreeStore',
+        'Ext.data.proxy.Ajax',
+        'Ext.data.reader.Json',
+        'Ext.tree.Column',
+        'Finetrust.model.ProductCategory',
+        'Finetrust.view.EntityTreeGrid'
     ],
 
     // items: {
-    //     xtype: 'model-grid',
+    //     xtype: 'entity-grid',
     //     store: Ext.create('Ext.data.TreeStore', {
     //         model: 'Finetrust.model.ProductCategory'
     //     }),
@@ -29,7 +33,7 @@ Ext.define('Finetrust.view.productCategory.Grider', {
         var me = this;
         Ext.apply(me, {
             items: [
-                Ext.create('Finetrust.view.TreeGrid', {
+                Ext.create('Finetrust.view.EntityTreeGrid', {
                     detailApp: 'Finetrust.app.ProductCategoryDetail',
                     rootVisible: false,
                     store: Ext.create('Ext.data.TreeStore', {
