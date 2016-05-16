@@ -13,7 +13,7 @@ Ext.define('Finetrust.app.ProductCategoryDetail', {
             },
                 _cfg = cfg || {};
             if (_cfg.id) {
-                links.id = _cfg.id;
+                links.id = _cfg.model;
             } else {
                 links.create = true;
             }

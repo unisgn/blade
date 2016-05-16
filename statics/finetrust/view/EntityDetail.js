@@ -12,13 +12,11 @@ Ext.define('Finetrust.view.EntityDetail', {
 
     requires: [
         'Ext.button.Button',
-        'Ext.layout.container.Fit',
         'Finetrust.controller.EntityDetail'
     ],
 
     controller: 'entity-detail',
 
-    layout: 'fit',
 
 
     i18n: {
@@ -64,7 +62,8 @@ Ext.define('Finetrust.view.EntityDetail', {
                         readOnly: readonly
                     };
                 }
-            }
+        }
+        
         me.callParent();
 
     },

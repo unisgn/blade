@@ -20,33 +20,75 @@ Ext.define('Finetrust.controller.EntityGrid', {
 
 
     on_itemcontextmenu: function (dom, record, item, idx, e) {
-        var view = this.getView();
-        e.stopEvent();
-        view.getItemContextMenu().showAt(e.getXY());
-        return false;
+        var view = this.getView(), readonly = !!view.readonly;
+        if (!readonly) {
+            e.stopEvent();
+            view.getItemContextMenu().showAt(e.getXY());
+            return false;
+        }
+        
     },
    
 
     on_itemdblclick: function (dom, record, item, idx, e) {
         e.stopEvent();
-        this.launch_detail(record.getId(), true);
+        this.launch_detail(record, true);
         return false;
     },
 
     on_containercontextmenu: function (dom, e) {
-        var view = this.getView();
-        e.stopEvent();
-        view.getContainerContextMenu().showAt(e.getXY());
-        return false;
+        var view = this.getView(), readonly = !!view.readonly;
+        if (!readonly) {
+            e.stopEvent();
+            view.getContainerContextMenu().showAt(e.getXY());
+            return false;
+        }
+
     },
     
+    on_menu_view: function () {
+        var me = this, view = me.getView(), record = view.getSingleSelection();
+        if (record) {
+            me.launch_detail(record, true);
+        }
+    },
 
-    // implemented by subclass
-    launch_detail: function (id, readonly) {
+    
+    on_menu_edit: function () {
+        var me = this, view = me.getView(), record = view.getSingleSelection();
+        if (record) {
+            me.launch_detail(record, false);
+        }
+    },
+    
+    on_menu_new: function () {
+        this.launch_detail();
+    },
+    
+    on_menu_remove: function () {
+        var me = this, view = me.getView(), record = view.getSingleSelection();
+        if (record) {
+            me.remove_entity(record);
+        }
+    },
+    
+    on_menu_refresh: function () {
+        this.refresh_page();
+    },
+    
+    
+    
+    
+    /**
+     *
+     * @param {String|Number|Ext.data.Model} [model] - the model of the record
+     * @param {Boolean} [readonly] - readonly mode
+     */
+    launch_detail: function (model, readonly) {
         var me = this, view = me.getView(), detailApp = view.getDetailApp();
         if (detailApp) {
             Beaux.launch(detailApp, {
-                id: id,
+                model: model,
                 readonly: readonly
             });
         }
@@ -55,9 +97,14 @@ Ext.define('Finetrust.controller.EntityGrid', {
 
     launch_query_panel: function () {
         var p = this.getView().getQueryPanel();
-        p.show && p.show();
+        p && p.show && p.show();
     },
-    
+
+
+    /**
+     * 
+     * @param {Ext.data.Model} record
+     */
     remove_entity: function(record) {
         var me = this;
         record.erase({
@@ -68,7 +115,7 @@ Ext.define('Finetrust.controller.EntityGrid', {
     },
 
     on_criteria_ready: function () {
-        var me = this, view = me.getView(), store = view.getStore(), filters = view.getQueryPanel().getFilters();
+        var me = this, view = me.getView(), store = view.getStore(), filters = view.getQueryPanel().createCriteria();
         store.clearFilter(true);
 
         if (filters.length > 0) {

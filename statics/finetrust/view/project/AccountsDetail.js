@@ -7,9 +7,8 @@ Ext.define('Finetrust.view.project.AccountsDetail', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Ext.data.Store',
-        'Finetrust.app.ProjectAccountItemDetail',
-        'Finetrust.model.ProjectAccount',
+        'Ext.button.Button',
+        'Finetrust.controller.ProjectAccountsItemGrid',
         'Finetrust.view.EntityGrid'
     ],
 
@@ -17,20 +16,16 @@ Ext.define('Finetrust.view.project.AccountsDetail', {
         title: '账户明细@{data.name}'
     },
     
-    config: {
-        restUrl: undefined
-    },
     
     initComponent: function () {
-        var me = this,
-            url = me.restUrl;
+        var me = this;
         
         me.items = Ext.create('Finetrust.view.EntityGrid', {
+            controller: 'project-accounts-item-grid',
             detailApp: 'Finetrust.app.ProjectAccountItemDetail',
-            store: Ext.create('Ext.data.Store', {
-                model: 'Finetrust.model.ProjectAccount',
-                autoLoad: true
-            }),
+            bind: {
+                store: '{accounts}'
+            },
             columns: [{
                 text: '帐号',
                 dataIndex: 'acct_no'
@@ -46,6 +41,13 @@ Ext.define('Finetrust.view.project.AccountsDetail', {
             },{
                 text: '销户日期',
                 dataIndex: 'close_date'
+            }],
+            fbar: [{
+                xtype: 'button',
+                text: 'save',
+                handler: function () {
+                    me.getViewModel().getStore('accounts').sync();
+                }
             }]
         });
 

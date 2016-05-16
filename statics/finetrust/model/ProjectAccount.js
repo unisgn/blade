@@ -9,7 +9,7 @@ Ext.define('Finetrust.model.ProjectAccount', {
         {name: 'acct_name', type: 'string'},
         {name: 'acct_type', type: 'int'},
         {name: 'branch', type: 'string'},
-        {name: 'open_date', type: 'date'},
-        {name: 'close_date', type: 'date'}
+        {name: 'open_date', type: 'date', dateFormat: 'U'},
+        {name: 'close_date', type: 'date', dateFormat: 'U'}
     ]
 });

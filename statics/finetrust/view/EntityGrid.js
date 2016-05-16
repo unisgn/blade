@@ -27,13 +27,18 @@
         scope: 'controller' // IMPORTANT
     },
 
-
-    /**
-     * @type {Beaux.desktop.XWindow}
-     */
+    selModel: {
+        mode: 'SINGLE',
+        allowDeselect: true
+    },
 
 
     config: {
+
+        /**
+         *
+         * @type {Beaux.desktop.XWindow}
+         */
         queryPanel: undefined,
         /**
          * stores all the context menu
@@ -55,17 +60,24 @@
          * @type {Ext.KeyMap}
          */
         keymap: undefined,
-        
-        detailApp: undefined
+
+
+        /**
+         * @type {Beaux.Application}
+         */
+        detailApp: undefined,
+
+
+        readonly: false
     },
 
 
     initComponent: function () {
-        var me = this;
+        var me = this, readonly = !!me.readonly;
 
         me.callParent();
 
-        if (me.queryPanel) {
+        if (!readonly && me.queryPanel) {
             me.queryPanel.on({
                 criteriaready: function () {
                     me.fireEvent('criteriaready');
@@ -87,115 +99,100 @@
     getItemContextMenu: function () {
         var me = this,
             menuId = 'item',
-            menu;
-        if (!me.menus.get(menuId)) {
-            menu = Ext.create('Ext.menu.Menu', {
-                items: [{
-                    text: '查看',
-                    handler: function () {
-                        var sel = me.getSingleSelection();
-                        if (sel) {
-                            me.getController().launch_detail(sel.getId(), true);
-                        }
-                    }
-                }, {
-                    text: '编辑',
-                    handler: function () {
-                        var sel = me.getSingleSelection();
-                        if (sel) {
-                            me.getController().launch_detail(sel.getId());
-                        }
-                    }
-                }, {
-                    text: '删除',
-                    handler: function () {
-                        var sel = me.getSingleSelection();
-                        if (sel) {
-                            Ext.Msg.show({
-                                title: 'Sure To Remove?',
-                                message: 'you are goting to remove ',
-                                buttons: Ext.Msg.OKCANCEL,
-                                fn: function (btn) {
-                                    if (btn == 'ok') {
-                                        me.getController().remove_entity(sel);
-                                    }
-                                }
-                            });
-                            
-                        }
-                    }
-                },{
-                    xtype: 'menuseparator'
-                },{
-                    text: '新建',
-                    handler: function () {
-                        me.getController().launch_detail();
-                    }
-                }, {
-                    text: '刷新',
-                    handler: function () {
-                        me.getController().refresh_page();
-                    }
-                }]
-            });
-            me.menus.add(menu);
-        } else {
-            menu = me.menus.get(menuId);
+            menu, readonly = !!me.readonly;
+
+        if (!readonly) {
+            if (!me.menus.get(menuId)) {
+                menu = Ext.create('Ext.menu.Menu', {
+                    items: [{
+                        text: '查看',
+                        handler: 'on_menu_view',
+                        scope: me.getController()
+                    }, {
+                        text: '编辑',
+                        handler: 'on_menu_edit',
+                        scope: me.getController()
+                    }, {
+                        text: '删除',
+                        handler: 'on_menu_remove',
+                        scope: me.getController()
+                    }, {
+                        xtype: 'menuseparator'
+                    }, {
+                        text: '新建',
+                        handler: 'on_menu_new',
+                        scope: me.getController()
+                    }, {
+                        text: '刷新',
+                        handler: 'on_menu_refresh',
+                        scope: me.getController()
+                    }]
+                });
+                me.menus.add(menu);
+            } else {
+                menu = me.menus.get(menuId);
+            }
+            return menu;
         }
-        return menu;
+        
     },
 
     getContainerContextMenu: function () {
         var me = this,
             menuId = 'container',
-            menu;
-        if (!me.menus.get(menuId)) {
-            menu = Ext.create('Ext.menu.Menu', {
-                items: [{
-                    text: '新建',
-                    handler: function () {
-                        me.getController().launch_detail();
-                    }
-                }, {
-                    text: '刷新',
-                    handler: function () {
-                        me.getController().refresh_page();
-                    }
-                }]
-            });
-            me.menus.add(menu);
-        } else {
-            menu = me.menus.get(menuId);
+            menu, readonly = !!me.readonly;
+        if (!readonly) {
+            if (!me.menus.get(menuId)) {
+                menu = Ext.create('Ext.menu.Menu', {
+                    items: [{
+                        text: '新建',
+                        handler: 'on_menu_new',
+                        scope: me.getController()
+                    }, {
+                        text: '刷新',
+                        handler: 'on_menu_refresh',
+                        scope: me.getController()
+                    }]
+                });
+                me.menus.add(menu);
+            } else {
+                menu = me.menus.get(menuId);
+            }
+            return menu;
         }
-        return menu;
     },
 
     /**
      * @override
      */
     afterRender: function () {
-        var me = this;
+        var me = this, readonly = !!me.readonly;
 
-        if (me.keymap) {
-            me.keymap.addBinding({
-                key: 's',
-                shift: true,
-                handler: function () {
-                        me.getController().launch_query_panel();
-                    }
-            });
-        } else {
-            me.keymap = Ext.create('Ext.KeyMap', {
-                target: me.getEl(),
-                binding: [{
+        if (!readonly) {
+            if (me.keymap) {
+                me.keymap.addBinding({
                     key: 's',
                     shift: true,
                     handler: function () {
                         me.getController().launch_query_panel();
                     }
-                }]
-            });
+                });
+            } else {
+                me.keymap = Ext.create('Ext.KeyMap', {
+                    target: me.getEl(),
+                    binding: [{
+                        key: 's',
+                        shift: true,
+                        handler: function () {
+                            me.getController().launch_query_panel();
+                        }
+                    }]
+                });
+            }
         }
+        
+
+
 
         me.callParent();
     },

@@ -7,9 +7,7 @@ Ext.define('Finetrust.view.project.AccountsGrid', {
     requires: [
         'Ext.data.proxy.Ajax',
         'Ext.data.reader.Json',
-        'Finetrust.data.Dict',
         'Finetrust.model.Project',
-        'Finetrust.model.ProjectAccount',
         'Finetrust.view.EntityGrid'
     ],
 

@@ -7,30 +7,21 @@ Ext.define('Finetrust.app.ProjectAccountItemDetail', {
 
     requires: [
         'Ext.app.ViewModel',
-        'Finetrust.model.ProjectAccount',
+        'Finetrust.controller.ProjectAccountsItemDetail',
         'Finetrust.view.project.AccountItemDetail'
     ],
 
     statics: {
         launch: function (cfg) {
-            var links = {
-                type: 'Finetrust.model.ProjectAccount'
-            },
-                _cfg = cfg || {};
-
-            if (_cfg.id) {
-                links.id = _cfg.id;
-            } else {
-                links.create = true;
-            }
 
             Ext.create('Finetrust.view.project.AccountItemDetail', {
+                controller: 'project-accounts-item-detail',
                 viewModel: Ext.create('Ext.app.ViewModel', {
-                    links: {
-                        data: links
+                    data: {
+                        data: cfg.model
                     }
                 }),
-                readonly: !!_cfg.readonly
+                readonly: !!cfg.readonly
             }).show();
         }
     }

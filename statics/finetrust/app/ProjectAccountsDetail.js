@@ -6,42 +6,39 @@ Ext.define('Finetrust.app.ProjectAccountsDetail', {
     extend: 'Beaux.Application',
 
     requires: [
-        'Finetrust.view.project.AccountsDetail',
-        'Finetrust.model.Project',
-        'Finetrust.model.ProjectAccount'
+        'Ext.app.ViewModel',
+        'Ext.data.Model',
+        'Ext.data.proxy.Rest',
+        'Ext.data.reader.Json',
+        'Finetrust.model.ProjectAccount',
+        'Finetrust.view.project.AccountsDetail'
     ],
 
     statics: {
         launch: function (cfg) {
-            var links = {
-                type: 'Finetrust.model.Project'
-            },
-                _cfg = cfg || {};
-
-            if (_cfg.id) {
-                links.id = _cfg.id;
-            } else {
-                links.create = true;
-            }
             
-            var url = '/api/Project/' + _cfg.id + '/accounts';
-            Finetrust.model.ProjectAccount.setProxy(Ext.create('Ext.data.proxy.Rest',{
-                url: url,
-                reader: {
-                    type: 'json',
-                    rootProperty: 'data'
-                }
-            }));
-
-            // console.log(Finetrust.model.ProjectAccount.getProxy());
-
+    
             Ext.create('Finetrust.view.project.AccountsDetail', {
                 viewModel: Ext.create('Ext.app.ViewModel', {
-                    links: {
-                        data: links
+                    stores: {
+                        accounts: {
+                            model: 'Finetrust.model.ProjectAccount',
+                            autoLoad: true,
+                            proxy: {
+                                url: '/api/Project/' + cfg.model.getId() + '/accounts',
+                                type: 'rest',
+                                reader: {
+                                    type: 'json',
+                                    rootProperty: 'data'
+                                }
+                            }
+                        }
+                    },
+                    data: {
+                        data: cfg.model
                     }
                 }),
-                readonly: !!_cfg.readonly
+                readonly: !!cfg.readonly
             }).show();
         }
     }

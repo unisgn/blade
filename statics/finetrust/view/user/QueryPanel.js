@@ -35,9 +35,9 @@ Ext.define('Finetrust.view.user.QueryPanel', {
         }]
     },
 
-    getFilters: function () {
+    createCriteria: function () {
         var me = this, data = me.getViewModel().getData();
-        ret = [];
+        var ret = [];
 
         Ext.Object.each(data, function (key, val) {
             if (Ext.String.trim(val) != '') {

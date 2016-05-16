@@ -38,7 +38,7 @@ Ext.define('Finetrust.view.QueryPanel', {
         me.callParent();
     },
 
-    getFilters: function () {
+    createCriteria: function () {
         
     }
 });

@@ -4,10 +4,11 @@
 
 
 Ext.define('Finetrust.view.project.AccountItemDetail', {
-    extend: 'Finetrust.view.EntityDetail',
+    extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.model.ProjectAccount'
+        'Ext.form.Panel',
+        'Ext.form.field.Date'
     ],
 
     items: {
