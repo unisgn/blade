@@ -20,10 +20,10 @@ Ext.define('Finetrust.controller.EntityGrid', {
 
 
     on_itemcontextmenu: function (dom, record, item, idx, e) {
-        var view = this.getView(), readonly = !!view.readonly;
-        if (!readonly) {
+        var view = this.getView(), readonly = !!view.readonly, menu = view.getItemContextMenu();
+        if (menu && !readonly) {
             e.stopEvent();
-            view.getItemContextMenu().showAt(e.getXY());
+            menu.showAt(e.getXY());
             return false;
         }
         
@@ -37,13 +37,12 @@ Ext.define('Finetrust.controller.EntityGrid', {
     },
 
     on_containercontextmenu: function (dom, e) {
-        var view = this.getView(), readonly = !!view.readonly;
-        if (!readonly) {
+        var view = this.getView(), readonly = !!view.readonly, menu = view.getContainerContextMenu();
+        if (!readonly && menu) {
             e.stopEvent();
-            view.getContainerContextMenu().showAt(e.getXY());
+            menu.showAt(e.getXY());
             return false;
         }
-
     },
     
     on_menu_view: function () {

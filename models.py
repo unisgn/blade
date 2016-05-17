@@ -3,7 +3,7 @@
 
 from sqlalchemy.ext.declarative import declarative_base, AbstractConcreteBase, as_declarative, declared_attr
 
-from sqlalchemy import Column, String, Integer, Boolean, Text, ForeignKey, Numeric, DateTime, Date
+from sqlalchemy import Column, String, Integer, Boolean, Text, ForeignKey, Numeric, DateTime, Date, PrimaryKeyConstraint, ForeignKeyConstraint
 from sqlalchemy.orm import relationship, composite
 from enum import Enum
 
@@ -16,9 +16,6 @@ def default_naming_strategy(name):
 
 @as_declarative()
 class Base:
-    @declared_attr
-    def __tablename__(cls):
-        return default_naming_strategy(cls.__name__)
 
     def __json__(self):
         ret = {}
@@ -33,14 +30,18 @@ class Base:
                 setattr(self, k, v)
 
 
-# Base = declarative_base(cls=Base)
-
-
 class DistinctBase(AbstractConcreteBase, Base):
     pass
 
 
-class BaseEntity:
+class PrimeBase:
+    @declared_attr
+    def __tablename__(cls):
+        return default_naming_strategy(cls.__name__)
+
+
+
+class BaseEntity(PrimeBase):
     archived = Column(Boolean, default=False)
     active = Column(Boolean, default=True)
 #
@@ -64,7 +65,7 @@ class BaseEntity:
 #         return ret
 
 
-class BusinessEntity:
+class BusinessEntity(PrimeBase):
     number = Column(String)
     code = Column(String)
     name = Column(String)
@@ -173,7 +174,7 @@ class Project(DistinctBase, BusinessEntity):
 #
 #
 
-class ProjectTransDoc(DistinctBase):
+class ProjectTransDoc(DistinctBase, PrimeBase):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
@@ -199,7 +200,7 @@ class ProjectTransDoc(DistinctBase):
 #     CLOSED = 3
 #
 #
-class ProjectAgent(DistinctBase):
+class ProjectAgent(DistinctBase, PrimeBase):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
@@ -218,7 +219,7 @@ class ProjectAgent(DistinctBase):
     project_id = Column(String, ForeignKey('project.id'))
 #
 #
-class ProjectPreAccount(DistinctBase):
+class ProjectPreAccount(DistinctBase, PrimeBase):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
@@ -235,7 +236,7 @@ class ProjectPreAccount(DistinctBase):
     project_id = Column(String, ForeignKey('project.id'))
 #
 #
-class SuperviseIssue(DistinctBase):
+class SuperviseIssue(DistinctBase, PrimeBase):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
@@ -253,7 +254,7 @@ class SuperviseIssue(DistinctBase):
 #
 #
 #
-class SuperviseIssueJournal(DistinctBase):
+class SuperviseIssueJournal(DistinctBase, PrimeBase):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
@@ -270,7 +271,7 @@ class SuperviseIssueJournal(DistinctBase):
     issue = relationship('SuperviseIssue', back_populates='journals')
 #
 #
-class ProjectAccount(DistinctBase):
+class ProjectAccount(DistinctBase, PrimeBase):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
@@ -291,7 +292,7 @@ class ProjectAccount(DistinctBase):
 
 
 
-class ProductCategory(DistinctBase):
+class ProductCategory(DistinctBase, PrimeBase):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
@@ -318,7 +319,7 @@ class ProductCategory(DistinctBase):
                 self.fullname = self.name
         object.__setattr__(self, key, value)
 
-#
+
 class Organization(DistinctBase, BaseEntity):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
@@ -342,3 +343,57 @@ class Organization(DistinctBase, BaseEntity):
             if value:
                 value.leaf = False
         object.__setattr__(self, key, value)
+
+
+class Duty(DistinctBase, BaseEntity):
+    id = Column(String, primary_key=True)
+    version = Column(Integer, nullable=False)
+    __mapper_args__ = {
+        'version_id_col': version,
+        'concrete': True,
+        'polymorphic_identity': 'Duty'
+    }
+
+    code = Column(String(20))
+    name = Column(String(64))
+    brief = Column(Text)
+
+
+class DutyGroup(DistinctBase, BaseEntity):
+    id = Column(String, primary_key=True)
+    version = Column(Integer, nullable=False)
+    __mapper_args__ = {
+        'version_id_col': version,
+        'concrete': True,
+        'polymorphic_identity': 'DutyGroup'
+    }
+
+    code = Column(String(20))
+    name = Column(String(64))
+    brief = Column(Text)
+
+    members = relationship('DutyGroupItem')
+
+    def __json__(self):
+        ret = super(DutyGroup, self).__json__()
+        ret['members'] = [e.__json__() for e in self.members]
+        return ret
+
+
+class DutyGroupItem(DistinctBase, PrimeBase):
+
+    group_id = Column(String, ForeignKey('duty_group.id'), primary_key=True)
+    duty_id = Column(String, ForeignKey('duty.id'), primary_key=True)
+
+    sub_idx = Column(Integer)
+    duty = relationship('Duty')
+
+    __mapper_args__ = {
+        'concrete': True,
+        'polymorphic_identity': 'DutyGroupItem'
+    }
+
+    def __json__(self):
+        ret = super(DutyGroupItem, self).__json__()
+        ret['duty'] = self.duty.__json__()
+        return ret

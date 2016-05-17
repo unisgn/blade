@@ -237,6 +237,105 @@ def get_project_supervise_issues(id):
         return [e.__json__() for e in rs]
 
 
+
+
+
+
+
+@route('/api/Duty')
+@restful
+def get_duty_list():
+    with open_session() as s:
+        rs = s.query(Duty).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/Duty', method='post')
+@restful
+def add_duty():
+    with open_session() as s:
+        vo = ctx.request.json
+        po = Duty(**vo)
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+
+@route('/api/Duty/<id>')
+@restful
+def get_duty(id):
+    with open_session() as s:
+        po = s.query(Duty).filter(Duty.id == id).one()
+        if po:
+            return po.__json__()
+
+
+
+@route('/api/Duty/<id>', method='put')
+@restful
+def update_duty(id):
+    with open_session() as s:
+        vo = ctx.request.json
+        po = s.query(Duty).filter(Duty.id == id).one()
+        if po:
+            po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+@route('/api/DutyGroup')
+@restful
+def get_duty_group_list():
+    with open_session() as s:
+        rs = s.query(DutyGroup).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/DutyGroup/<id>')
+@restful
+def get_duty_group(id):
+    with open_session() as s:
+        po = s.query(DutyGroup).filter(DutyGroup.id == id).one()
+        if po:
+            return po.__json__()
+
+
+@route('/api/DutyGroup', method='post')
+@restful
+def add_duty_group():
+    with open_session() as s:
+        vo = ctx.request.json
+        po = DutyGroup()
+        po.update_vo(vo)
+
+        members = vo['member_csv'].split(',')
+        for id in members:
+            duty = s.query(Duty).filter(Duty.id == id).one()
+            if duty:
+                item = DutyGroupItem()
+                item.duty = duty
+                po.members.append(item)
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+
+@route('/api/DutyGroup/<id>', method='put')
+@restful
+def update_duty_group(id):
+    with open_session() as s:
+        po = s.query(DutyGroup).filter(DutyGroup.id == id).one()
+        if po:
+            vo = ctx.request.json
+            po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+
+
 @route('/api/data/project/basic')
 @restful
 def get_project_basic():
