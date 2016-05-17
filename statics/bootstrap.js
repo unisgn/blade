@@ -32,6 +32,12 @@ Ext.onReady(function () {
         }
     });
 
+    Ext.Ajax.on({
+        requestexception: function (conn, resp, opt) {
+            console.log(resp);
+        }
+    });
+
     Beaux.setDisplayManager(null);
     Beaux.setDesktopManager(Beaux.desktop.Desktop);
     Beaux.boot();
