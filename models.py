@@ -14,6 +14,7 @@ def default_naming_strategy(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
+
 @as_declarative()
 class Base:
 
@@ -337,7 +338,6 @@ class Organization(DistinctBase, BaseEntity):
     parent_id = Column(String, ForeignKey('organization.id'))
     parent = relationship('Organization', remote_side=[id])
 
-
     def __setattr__(self, key, value):
         if key == 'parent':
             if value:
@@ -397,3 +397,24 @@ class DutyGroupItem(DistinctBase, PrimeBase):
         ret = super(DutyGroupItem, self).__json__()
         ret['duty'] = self.duty.__json__()
         return ret
+
+
+class Attachment(DistinctBase, PrimeBase):
+    id = Column(String, primary_key=True)
+    __mapper_args__ = {
+        'concrete': True,
+        'polymorphic_identity': 'Attachment'
+    }
+    fkid = Column(String(64))
+    fpath = Column(String(255))
+    fname = Column(String(255))
+    mime = Column(String(32))
+    upload_date = Column(Integer)
+
+
+class ActivityLog:
+    activity_type = None
+    action_type = None
+    subject = None
+    detail = None
+    target = None

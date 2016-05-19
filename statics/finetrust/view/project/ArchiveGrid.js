@@ -30,14 +30,15 @@ Ext.define('Finetrust.view.project.ArchiveGrid', {
             }
         },
         columns: [{
-            text: 'Number',
+            text: '项目编号',
             dataIndex: 'number'
         }, {
-            text: 'Name',
+            text: '项目名称',
             dataIndex: 'name'
         },{
-            text: 'Type',
-            dataIndex: 'proj_type'
+            text: '类型',
+            dataIndex: 'proj_type',
+            renderer: Finetrust.data.Dict.keyrenderer('project_type')
         }]
     }
 });

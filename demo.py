@@ -8,11 +8,9 @@ import demjson
 
 import functools
 
+import tempfile
 
-Base.metadata.create_all(engine)
+f = tempfile.TemporaryFile('w+b')
+f.write(b'123456789')
+f.write(b'123456789')
 
-
-with open_session() as s:
-    rs = s.query(DutyGroup).all()
-    e = rs[0]
-    print(dir(e))

@@ -4,26 +4,50 @@
 
 
 Ext.define('Finetrust.view.project.SuperviseDetail', {
-    extend: 'Finetrust.view.EntityDetail',
+    extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Ext.data.Store',
         'Ext.form.Panel',
-        'Finetrust.model.ProjectSuperviseIssue',
-        'Finetrust.view.EntityGrid'
+        'Ext.form.field.Checkbox',
+        'Ext.form.field.ComboBox',
+        'Ext.form.field.TextArea',
+        'Ext.grid.Panel',
+        'Ext.grid.column.Boolean',
+        'Ext.grid.plugin.RowEditing',
+        'Ext.selection.RowModel',
+        'Finetrust.model.ProjectSuperviseIssue'
     ],
+
+    height: 520,
+
+    layout: {
+        type: 'auto'
+    },
 
     bind: {
         title: '监督事项@{data.name}'
     },
 
+    config: {
+        readonly: false
+    },
+
     initComponent: function (args) {
-        var me = this;
+        var me = this, editor = Ext.create('Ext.grid.plugin.RowEditing', {
+            clicksToEdit: 1,
+            listeners: {
+                cancelEdit: function (e, ctx) {
+                    if (ctx.record.phantom) {
+                        me.getViewModel().getStore('issues').remove(ctx.record);
+                    }
+                }
+            }
+        });
         me.items = [{
             xtype: 'form',
             defaultType: 'textfield',
             defaults: {
-                readOnly: false
+                readOnly: me.readonly
             },
             items: [{
                 fieldLabel: 'Number',
@@ -49,25 +73,83 @@ Ext.define('Finetrust.view.project.SuperviseDetail', {
                 name: 'asset_code',
                 bind: '{data.asset_code}'
             }]
-        }, Ext.create('Finetrust.view.EntityGrid', {
-            detailApp: 'Finetrust.app.ProjectSuperviseIssueDetail',
-            store: Ext.create('Ext.data.Store', {
-                model: 'Finetrust.model.ProjectSuperviseIssue',
-                autoLoad: true
-            }),
-            columns: [{
-                text: '帐号',
-                dataIndex: 'content'
+        }, {
+            flex: 1,
+            minHeight: 200,
+            xtype: 'grid',
+            bind: {
+                store: '{issues}'
+            },
+            plugins: editor,
+            columns: {
+                defaults: {
+                    align: 'center'
+                },
+                items: [{
+                    text: '监督内容',
+                    width: 100,
+                    dataIndex: 'issue_type',
+                    renderer: function (v) {
+                        var v = Finetrust.data.Dict.keyset('supervise_type')[v];
+                        return v ? v.text : '';
+                    },
+                    editor: {
+                        xtype: 'combobox',
+                        store: {
+                            fields: ['key', 'text'],
+                            data: Finetrust.data.Dict.keyset('supervise_type')
+                        },
+                        valueField: 'key',
+                        displayField: 'text'
+                    }
+                }, {
+                    text: '人工监控',
+                    width: 80,
+                    dataIndex: 'artificial',
+                    xtype: 'booleancolumn',
+                    trueText: '是',
+                    falseText: '否',
+                    editor: {
+                        xtype: 'checkbox'
+                    }
+                }, {
+                    flex: 1,
+                    align: 'left',
+                    text: '监督事项',
+                    dataIndex: 'content',
+                    editor: {
+                        xtype: 'textarea'
+                    }
+                }]
+            },
+            selModel: 'rowmodel',
+            tbar: [{
+                text: 'Add',
+                handler: function () {
+                    var store = me.getViewModel().getStore('issues');
+                    store.insert(0, Ext.create('Finetrust.model.ProjectSuperviseIssue'));
+                    editor.startEdit(0, 0);
+                }
             }, {
-                text: '类型',
-                dataIndex: 'issue_type'
-            }, {
-                text: '是否人工监控',
-                dataIndex: 'artificial'
-            }]
-        })
-        ];
+                text: 'remove',
+                handler: function () {
 
-        me.callParent(args);
+                    var sel = me.down('grid').getSelection()[0];
+                    if (sel) {
+                        me.getViewModel().getStore('issues').remove(sel);
+                    }
+                }
+            }]
+        }];
+
+        me.fbar = [{
+            text: 'Save',
+            handler: function () {
+                me.getViewModel().getStore('issues').sync();
+            }
+        }];
+
+
+        me.callParent();
     }
 });

@@ -12,6 +12,7 @@
         'Finetrust.view.project.OperationGrid',
         'Finetrust.view.project.AccountsGrid',
         'Finetrust.view.project.SuperviseGrid',
+        'Finetrust.view.project.SuperviseJournalGrid',
         'Finetrust.view.project.ArchiveGrid'
     ],
     
@@ -24,6 +25,7 @@
             operation: 'Finetrust.view.project.OperationGrid',
             accounts: 'Finetrust.view.project.AccountsGrid',
             supervise: 'Finetrust.view.project.SuperviseGrid',
+            supervise_journal: 'Finetrust.view.project.SuperviseJournalGrid',
             archive: 'Finetrust.view.project.ArchiveGrid'
 
         },

@@ -40,7 +40,7 @@ Ext.define('Finetrust.view.project.EssentialDetail', {
             bind: '{data.contract_status}',
             xtype: 'combobox',
             store: {
-                data: Finetrust.data.Dict.get('contract_status'),
+                data: Finetrust.data.Dict.keyset('contract_status'),
                 fields: ['key', 'text']
             },
             valueField: 'key',

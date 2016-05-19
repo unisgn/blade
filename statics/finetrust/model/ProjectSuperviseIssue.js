@@ -7,6 +7,11 @@ Ext.define('Finetrust.model.ProjectSuperviseIssue', {
     fields:[
         {name: 'issue_type', type: 'string'},
         {name: 'content', type: 'string'},
-        {name: 'artificial', type: 'boolean'}
+        {name: 'artificial', type: 'boolean'},
+        {name: 'project_id', reference: {
+            type: 'Project',
+            role: 'Project'
+        }}
     ]
+
 });

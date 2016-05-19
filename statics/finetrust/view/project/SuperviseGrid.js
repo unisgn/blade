@@ -5,10 +5,12 @@ Ext.define('Finetrust.view.project.SuperviseGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.EntityGrid',
-        'Finetrust.model.Project',
+        'Ext.data.proxy.Ajax',
+        'Ext.data.reader.Json',
         'Finetrust.data.Dict',
-        'Finetrust.model.ProjectSuperviseIssue'
+        'Finetrust.model.Project',
+        'Finetrust.model.ProjectSuperviseIssue',
+        'Finetrust.view.EntityGrid'
     ],
 
     title: '投资监督事项',

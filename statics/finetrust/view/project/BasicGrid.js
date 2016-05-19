@@ -40,7 +40,7 @@ Ext.define('Finetrust.view.project.BasicGrid', {
             text: 'Type',
             dataIndex: 'proj_type',
             renderer: function (val) {
-                return Finetrust.data.Dict.get('project_type')[val]['text']
+                return Finetrust.data.Dict.keyset('project_type')[val]['text']
             }
         },{
             text: '创建日期',

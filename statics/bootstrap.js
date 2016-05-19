@@ -13,7 +13,7 @@ Ext.Loader.setConfig({
 
 Ext.Loader.loadScript('beaux/Beaux.js');
 
-
+Ext.Loader.loadScript('finetrust/data/Dict.js');
 // doesn't work on extjs5
 /*Ext.getDoc().on({
     contextmenu: function(e) { e.stopEvent(); }
@@ -21,6 +21,7 @@ Ext.Loader.loadScript('beaux/Beaux.js');
 
 Ext.require('Beaux.login.LoginMgr');
 Ext.require('Beaux.desktop.Desktop');
+
 
 Ext.onReady(function () {
 
@@ -37,6 +38,7 @@ Ext.onReady(function () {
             console.log(resp);
         }
     });
+    // TODO: hack the {Ext.data.reader.Reader} to handle global {success:false} event
 
     Beaux.setDisplayManager(null);
     Beaux.setDesktopManager(Beaux.desktop.Desktop);

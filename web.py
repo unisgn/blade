@@ -101,6 +101,12 @@ class HTTPError(Exception):
         return int(self._status.value)
 
 
+class MultipartFile:
+    def __init__(self, storage):
+        self.filename = storage.filename
+        self.file = storage.file
+
+
 class Request:
     def __init__(self, environ):
         self._environ = environ
@@ -160,20 +166,15 @@ class Request:
         return self._environ
 
     @property
-    def raw_input(self):
+    def form(self):
         if not hasattr(self, '_raw_input'):
             fs = cgi.FieldStorage(fp=self._environ['wsgi.input'], environ=self._environ, keep_blank_values=True)
-            ret = {}
-            for fname in fs:
-                ret[fname] = fs[fname].value
-            self._raw_input = ret
+            self._raw_input = fs
         return self._raw_input
 
     def input(self, key):
-        return self.raw_input.get(key, None)
+        return self.form.getvalue(key)
 
-    def __getitem__(self, item):
-        return self.raw_input[item]
 
 
 class Response:
@@ -373,7 +374,10 @@ class Router:
 _router = Router()
 
 
-def _static_file_generator(fpath):
+
+
+
+def static_file_generator(fpath):
     # can't read/write ctx in an generator function
     # so you can't have code as follows
     #
@@ -398,7 +402,7 @@ class static_file_handler:
         ctx.response.content_type = mime
 
     def __call__(self, *args):
-        return _static_file_generator(self.fpath)
+        return static_file_generator(self.fpath)
 
 
 def restful(fn):
@@ -421,7 +425,7 @@ def restful(fn):
             print(stacks)
             fp.close()
             ret['success'] = False
-            ret['data'] = stacks
+            ret['msg'] = stacks
         return jsonify(ret)
     return d
 
@@ -474,7 +478,7 @@ class WSGI:
             if sessionid:
                 session = ctx.session = _sessions.get(sessionid)
             else:
-                sessionid = str(uuid.uuid4())
+                sessionid = str(uuid.uuid1())
                 resp.make_cookie(SESSION_NAME, sessionid)
                 session = {}
                 _sessions[sessionid] = session

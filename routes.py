@@ -1,13 +1,20 @@
 """
 
 """
+import mimetypes
 
-from web import ctx, route, restful, intercept
+from web import ctx, route, restful, intercept, MultipartFile, static_file_generator
 from security import secured
-from dbx import open_session
+from dbx import open_session, open_conn
 from models import *
 import demjson
 from sqlalchemy import text
+from sqlalchemy.sql import select, and_, or_, not_, label
+import uuid
+import os
+import time
+
+from urllib import parse
 
 @route('/login/<name>')
 @restful
@@ -70,7 +77,7 @@ def add_user():
 @restful
 def get_user(id):
     with open_session() as session:
-        po = session.query(User).filter(User.id == id).one()
+        po = session.query(User).filter(User.id == id).one_or_none()
         if po:
             return po.__json__()
 
@@ -109,7 +116,7 @@ def add_product_category():
         po = ProductCategory()
         po.update_vo(vo)
         if po.parent_id:
-            parent = session.query(ProductCategory).filter(ProductCategory.id == po.parent_id).one()
+            parent = session.query(ProductCategory).filter(ProductCategory.id == po.parent_id).one_or_none()
             po.parent = parent
         else:
             po.parent = None
@@ -122,7 +129,7 @@ def add_product_category():
 @restful
 def get_product_category(id):
     with open_session() as session:
-        po = session.query(ProductCategory).filter(ProductCategory.id == id).one()
+        po = session.query(ProductCategory).filter(ProductCategory.id == id).one_or_none()
         if po:
             return po.__json__()
 
@@ -132,10 +139,10 @@ def get_product_category(id):
 def update_product_category(id):
     with open_session() as session:
         vo = ctx.request.json
-        po = session.query(ProductCategory).filter(ProductCategory.id == id).one()
+        po = session.query(ProductCategory).filter(ProductCategory.id == id).one_or_none()
         po.update_vo(vo)
         if vo['parent_id']:
-            parent = session.query(ProductCategory).filter(ProductCategory.id == id).one()
+            parent = session.query(ProductCategory).filter(ProductCategory.id == id).one_or_none()
             po.parent = parent
         else:
             po.parent = None
@@ -168,7 +175,7 @@ def add_project():
 @restful
 def get_project(id):
     with open_session() as s:
-        po = s.query(Project).filter(Project.id == id).one()
+        po = s.query(Project).filter(Project.id == id).one_or_none()
         if po:
             return po.__json__()
 
@@ -178,7 +185,7 @@ def get_project(id):
 def update_project(id):
     with open_session() as s:
         vo = ctx.request.json
-        po = s.query(Project).filter(Project.id == id).one()
+        po = s.query(Project).filter(Project.id == id).one_or_none()
         if po:
             po.update_vo(vo)
             s.add(po)
@@ -212,7 +219,7 @@ def add_project_account(id):
 def update_project_account(id, sid):
     with open_session() as s:
         vo = ctx.request.json
-        po = s.query(ProjectAccount).filter(ProjectAccount.id == sid).filter(ProjectAccount.project_id == id).one()
+        po = s.query(ProjectAccount).filter(ProjectAccount.id == sid).filter(ProjectAccount.project_id == id).one_or_none()
         if po:
             po.update_vo(vo)
             s.add(po)
@@ -224,7 +231,7 @@ def update_project_account(id, sid):
 @restful
 def remove_project_account(id, sid):
     with open_session() as s:
-        po = s.query(ProjectAccount).filter(ProjectAccount.id == sid).filter(ProjectAccount.project_id == id).one()
+        po = s.query(ProjectAccount).filter(ProjectAccount.id == sid).filter(ProjectAccount.project_id == id).one_or_none()
         if po:
             s.delete(po)
 
@@ -237,7 +244,98 @@ def get_project_supervise_issues(id):
         return [e.__json__() for e in rs]
 
 
+@route('/api/Project/<id>/supervise_issues', method='post')
+@restful
+def add_project_supervise_issue(id):
+    with open_session() as s:
+        po = SuperviseIssue()
+        vo = ctx.request.json
+        po.update_vo(vo)
+        po.project_id = id
+        s.add(po)
+        s.commit()
+        return po.__json__()
 
+
+@route('/api/Project/<id>/supervise_issues/<sid>', method='put')
+@restful
+def update_project_supervise_issue(id, sid):
+    with open_session() as s:
+        po = s.query(SuperviseIssue).filter(SuperviseIssue.id == sid).filter(SuperviseIssue.project_id == id ).one_or_none()
+        if po:
+            vo = ctx.request.json
+            po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+
+@route('/api/ProjectSuperviseIssue/<id>/journals')
+@restful
+def get_project_supervise_issue_journal(id):
+    with open_session() as s:
+        rs = s.query(SuperviseIssueJournal).filter(SuperviseIssueJournal.issue_id == id).order_by(SuperviseIssueJournal.jnl_date.desc()).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/ProjectSuperviseIssue/<id>/journals', method='post')
+@restful
+def add_project_supervise_issue_journal(id):
+    with open_session() as s:
+        po = SuperviseIssueJournal()
+        vo = ctx.request.json
+        po.update_vo(vo)
+        po.issue_id = id
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+
+@route('/api/ProjectSuperviseIssue/<id>/journals/<sid>', method='put')
+@restful
+def update_project_supervise_issue_journal(id, sid):
+    with open_session() as s:
+        po = s.query(SuperviseIssueJournal).filter(SuperviseIssueJournal.id == sid).filter(SuperviseIssueJournal.issue_id == id ).one_or_none()
+        if po:
+            vo = ctx.request.json
+            po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+@route('/api/Project/<id>/transdoc')
+@restful
+def get_project_archive_item_list(id):
+    with open_session() as s:
+        rs = s.query(ProjectTransDoc).filter(ProjectTransDoc.project_id == id).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/Project/<id>/transdoc', method='post')
+@restful
+def add_project_archive_item(id):
+    with open_session() as s:
+        po = ProjectTransDoc()
+        vo = ctx.request.json
+        po.update_vo(vo)
+        po.project_id = id
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+@route('/api/Project/<id>/transdoc/<sid>', method='put')
+@restful
+def update_project_archive_item(id, sid):
+    with open_session() as s:
+        po = s.query(ProjectTransDoc).filter(ProjectTransDoc.id == sid, ProjectTransDoc.project_id == id).one_or_none()
+        if po:
+            vo = ctx.request.json
+            po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
 
 
 
@@ -265,7 +363,7 @@ def add_duty():
 @restful
 def get_duty(id):
     with open_session() as s:
-        po = s.query(Duty).filter(Duty.id == id).one()
+        po = s.query(Duty).filter(Duty.id == id).one_or_none()
         if po:
             return po.__json__()
 
@@ -276,7 +374,7 @@ def get_duty(id):
 def update_duty(id):
     with open_session() as s:
         vo = ctx.request.json
-        po = s.query(Duty).filter(Duty.id == id).one()
+        po = s.query(Duty).filter(Duty.id == id).one_or_none()
         if po:
             po.update_vo(vo)
             s.add(po)
@@ -296,7 +394,7 @@ def get_duty_group_list():
 @restful
 def get_duty_group(id):
     with open_session() as s:
-        po = s.query(DutyGroup).filter(DutyGroup.id == id).one()
+        po = s.query(DutyGroup).filter(DutyGroup.id == id).one_or_none()
         if po:
             return po.__json__()
 
@@ -311,7 +409,7 @@ def add_duty_group():
 
         members = vo['member_csv'].split(',')
         for id in members:
-            duty = s.query(Duty).filter(Duty.id == id).one()
+            duty = s.query(Duty).filter(Duty.id == id).one_or_none()
             if duty:
                 item = DutyGroupItem()
                 item.duty = duty
@@ -325,7 +423,7 @@ def add_duty_group():
 @restful
 def update_duty_group(id):
     with open_session() as s:
-        po = s.query(DutyGroup).filter(DutyGroup.id == id).one()
+        po = s.query(DutyGroup).filter(DutyGroup.id == id).one_or_none()
         if po:
             vo = ctx.request.json
             po.update_vo(vo)
@@ -354,7 +452,7 @@ def get_project_essential():
 
 @route('/api/data/project/online')
 @restful
-def get_project_essential():
+def get_project_online():
     with open_session() as s:
         rs = s.query(Project).all()
         return [e.__json__() for e in rs]
@@ -362,7 +460,7 @@ def get_project_essential():
 
 @route('/api/data/project/operators')
 @restful
-def get_project_essential():
+def get_project_operators():
     with open_session() as s:
         rs = s.query(Project).all()
         return [e.__json__() for e in rs]
@@ -370,7 +468,7 @@ def get_project_essential():
 
 @route('/api/data/project/operation')
 @restful
-def get_project_essential():
+def get_project_operation():
     with open_session() as s:
         rs = s.query(Project).all()
         return [e.__json__() for e in rs]
@@ -378,7 +476,7 @@ def get_project_essential():
 
 @route('/api/data/project/accounts')
 @restful
-def get_project_essential():
+def get_project_accounts():
     with open_session() as s:
         rs = s.query(Project).all()
         return [e.__json__() for e in rs]
@@ -386,15 +484,28 @@ def get_project_essential():
 
 @route('/api/data/project/supervise')
 @restful
-def get_project_essential():
+def get_project_supervise():
     with open_session() as s:
         rs = s.query(Project).all()
         return [e.__json__() for e in rs]
 
 
+@route('/api/data/project/supervise/journal')
+@restful
+def get_project_supervise_journal_list():
+    with open_session() as s:
+        rs = s.query(SuperviseIssue, Project).join(Project).filter(SuperviseIssue.artificial == True).all()
+        ret = []
+        for i, p in rs:
+            r = i.__json__()
+            r['project'] = p.__json__()
+            ret.append(r)
+        return ret
+
+
 @route('/api/data/project/archive')
 @restful
-def get_project_essential():
+def get_project_archive():
     with open_session() as s:
         rs = s.query(Project).all()
         return [e.__json__() for e in rs]
@@ -405,15 +516,8 @@ def get_project_essential():
 @route('/api/tree/ProductCategory')
 @restful
 def get_product_category_node():
-    node = ctx.request.input('node')
-    if not node:
-        node = 'root'
     with open_session() as session:
         q = session.query(ProductCategory)
-        # if node == 'root':
-        #     q = q.filter(ProductCategory.parent_id.is_(None))
-        # else:
-        #     q = q.filter(ProductCategory.parent_id == node)
         return [o.__json__() for o in q.all()]
 
 
@@ -426,14 +530,95 @@ def get_product_category_dict():
         return rs
 
 
-@route('/download/<path_id>')
-def download(path_id):
-    pass
+
+@route('/api/Attachment/')
+@restful
+def get_attachments():
+    fkid = ctx.request.form.getvalue('fkid')
+    if fkid:
+        with open_session() as s:
+            rs = s.query(Attachment.id, Attachment.fname, Attachment.fkid, Attachment.upload_date)\
+                .filter(Attachment.fkid == fkid)\
+                .order_by(Attachment.upload_date.desc()).all()
+            return rs
+
+
+@route('/api/Attachment/<id>', method='delete')
+@restful
+def remove_attachment(id):
+    with open_session() as s:
+        po = s.query(Attachment).filter(Attachment.id == id).one_or_none()
+        if po:
+            fpath = po.fpath
+            os.remove(fpath)
+            s.delete(po)
+
+
+
+@route('/download')
+def download():
+    sid = ctx.request.form.getvalue('fid')
+    with open_session() as s:
+        atta = s.query(Attachment).filter(Attachment.id == sid).one_or_none()
+        if atta:
+            path = atta.fpath
+            fname = atta.fname
+            ctx.response.content_type = 'application/octet-stream'
+            ctx.response.header('Content-Disposition', 'attachment;filename=%s' % parse.quote(fname))
+            return static_file_generator(path)
 
 
 @route('/upload', method='POST')
 def upload():
-    pass
+    ret = {
+        'success': True,
+        'msg': 'ok'
+    }
+    form = ctx.request.form
+    fkid = form.getvalue('fkid')
+    if fkid:
+        for k in form:
+            v = form[k]
+            if v.filename:
+                fname = v.filename
+                fid = str(uuid.uuid1())
+                dest_path = '/home/yinlan/uploads/%s' % fid
+                try:
+                    with open(dest_path, 'wb') as dest:
+                        src = v.file
+                        while 1:
+                            buf = src.read(8192)
+                            if buf:
+                                dest.write(buf)
+                            else:
+                                break
+                    with open_session() as s:
+                        po = Attachment()
+                        po.id = fid
+                        po.fkid = fkid
+                        po.fname = fname
+                        po.fpath = dest_path
+                        po.upload_date = int(time.time())
+                        s.add(po)
+                        s.commit()
+                        ret['data'] = {
+                            'id': fid,
+                            'fkid': fkid,
+                            'fname': fname,
+                            'upload_date': po.upload_date
+                        }
+                except Exception as e:
+                    msg = str(e)
+                    if os.path.exists(dest_path):
+                        os.remove(dest_path)
+                    ret['success'] = False
+                    ret['msg'] = msg
+                    print(msg )
+
+    else:
+        ret['success'] = False
+        ret['msg'] = 'no fkid found'
+    return demjson.encode(ret)
 
 
 # @intercept('/')

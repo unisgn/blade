@@ -7,28 +7,57 @@ Ext.define('Finetrust.app.ProjectArchiveDetail', {
 
     requires: [
         'Ext.app.ViewModel',
+        'Ext.data.proxy.Ajax',
+        'Ext.data.proxy.Rest',
+        'Ext.data.reader.Json',
+        'Finetrust.model.Attachment',
+        'Finetrust.model.ProjectArchive',
         'Finetrust.view.project.ArchiveDetail'
     ],
 
     statics: {
         launch: function (cfg) {
-            var links = {
-                type: 'Finetrust.model.Project'
-            }, _cfg = cfg || {};
+            var model = cfg.model;
             
-            if (_cfg.id) {
-                links.id = _cfg.model;
-            } else {
-                links.create = true;
-            }
+            
             
             Ext.create('Finetrust.view.project.ArchiveDetail', {
                 viewModel: Ext.create('Ext.app.ViewModel', {
-                    links: {
-                        data: links
+                    data: {
+                        data: model
+                    },
+                    stores: {
+                        tran_docs: {
+                            model: 'Finetrust.model.ProjectArchive',
+                            proxy: {
+                                type: 'rest',
+                                url: Ext.String.format('/api/Project/{0}/transdoc', model.getId()),
+                                reader: {
+                                    rootProperty: 'data',
+                                    type: 'json'
+                                }
+                            },
+                            autoLoad: true
+                        },
+                        attachments: {
+                            model: 'Finetrust.model.Attachment',
+                            proxy: {
+                                type: 'rest',
+                                url: '/api/Attachment',
+                                extraParams: {
+                                    fkid: model.getId()
+                                },
+                                reader: {
+                                    rootProperty: 'data',
+                                    type: 'json'
+                                }
+                            },
+                            autoLoad: true,
+                            autoSync: true
+                        }
                     }
                 }),
-                readonly: !!_cfg.readonly
+                readonly: !!cfg.readonly
             }).show();
         }
     }

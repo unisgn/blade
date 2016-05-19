@@ -25,3 +25,7 @@ def open_session():
         session.close()
 
 
+def open_conn():
+    return engine.connect()
+
+

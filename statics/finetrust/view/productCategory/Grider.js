@@ -14,6 +14,8 @@ Ext.define('Finetrust.view.productCategory.Grider', {
         'Finetrust.view.EntityTreeGrid'
     ],
 
+    title: '产品目录',
+    
     // items: {
     //     xtype: 'entity-grid',
     //     store: Ext.create('Ext.data.TreeStore', {
