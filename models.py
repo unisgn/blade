@@ -75,14 +75,18 @@ class BusinessEntity(PrimeBase):
     search_field = Column(String)
 
 
-class User(DistinctBase, BaseEntity):
+class Auditable:
+    last_modified_date = Column(Integer)
+
+
+class User(Auditable, DistinctBase, BaseEntity):
     __tablename__ = 't_user'
 
-    username = Column(String, nullable=False)
+    username = Column(String, nullable=False, primary_key=True)
     password = Column(String)
     alias = Column(String)
+    name = Column(String)
 
-    id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
         'version_id_col': version,
@@ -418,3 +422,26 @@ class ActivityLog:
     subject = None
     detail = None
     target = None
+
+
+class AppDict(DistinctBase, BusinessEntity):
+    id = Column(String, primary_key=True)
+    __mapper_args__ = {
+        'concrete': True,
+        'polymorphic_identity': 'AppDict'
+    }
+    nullable = Column(Boolean)
+    dict_type = Column(String(1))
+    items = relationship('AppDictItem')
+
+
+class AppDictItem(DistinctBase, PrimeBase):
+    id = Column(String, primary_key=True)
+    __mapper_args__ = {
+        'concrete': True,
+        'polymorphic_identity': 'AppDictItem'
+    }
+    app_dict_fk = Column(String, ForeignKey('app_dict.id'))
+    value = Column(String(64))
+    text = Column(String(255))
+    memo = Column(String(255))

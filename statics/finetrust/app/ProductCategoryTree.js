@@ -5,6 +5,7 @@ Ext.define('Finetrust.app.ProductCategoryTree', {
     extend: 'Beaux.Application',
     
     requires: [
+        'Beaux.desktop.XWindow',
         'Finetrust.view.productCategory.Grider'
     ],
     
@@ -14,7 +15,9 @@ Ext.define('Finetrust.app.ProductCategoryTree', {
             if (me.xwin) {
                 me.xwin.toFront();
             } else {
-                me.xwin = Ext.create('Finetrust.view.productCategory.Grider');
+                me.xwin = Ext.create('Beaux.desktop.XWindow', {
+                    items: Ext.create('Finetrust.view.productCategory.Grider')
+                });
                 me.xwin.on({
                     destroy: function () {
                         me.xwin = undefined;

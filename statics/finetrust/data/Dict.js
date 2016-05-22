@@ -5,55 +5,174 @@
 (function (Ext) {
     Ext.ns('Finetrust.data.Dict');
     var d = Finetrust.data.Dict;
-    var dict_set = {
-        contract_status:[
-            {key: 0, text: '未授权'},
-            {key: 1, text: '已授权'},
-            {key: 2, text: '高级授权'}
-        ],
-        project_type: [
-            {key: 0, text: '传统'},
-            {key: 1, text: '非传统'}
-        ],
-        supervise_type: [
-            {key:'0', text: '投资范围'},
-            {key:'1', text: '投资限制'},
-            {key:'2', text: '其他'}
-        ]
+
+    /**
+     * predefined fixed application aware dicts
+     * @type {object}
+     */
+    var DICT_SET = {
+        contract_status: {
+            values: [
+                {value: '1', text: '未授权'},
+                {value: '2', text: '已授权'},
+                {value: '3', text: '高级授权'}
+            ]
+        },
+        project_type: {
+            values: [
+                {value: '1', text: '传统'},
+                {value: '2', text: '非传统'}
+            ]
+        },
+        supervise_type: {
+            values: [
+                {value: '1', text: '投资范围'},
+                {value: '2', text: '投资限制'},
+                {value: '3', text: '其他'}
+            ]
+        }
     };
 
-    var dict_map = {}, dm;
+    var DICT_MAP;
 
-    Ext.Object.each(dict_set, function (k, v, o) {
-        dm = {};
-        Ext.Array.each(v, function (v, idx, len) {
-            dm[v['key']] = v;
+
+    function parse_key_set(ks) {
+        var ret = {}, dm;
+        Ext.Object.each(ks, function (k, v, o) {
+            dm = {};
+            Ext.Array.each(v.values, function (v, idx, len) {
+                dm[v['value']] = v;
+            });
+            ret[k] = {values: dm};
         });
-        dict_map[k] = dm;
-    });
-    
+        return ret;
+    }
+
+    DICT_MAP = parse_key_set(DICT_SET);
+
+    /**
+     * usually used by combobox store's inline data
+     * @param key
+     * @returns {*}
+     */
     d.keyset = function (key) {
-        return dict_set[key];
+        return DICT_SET[key] ? DICT_SET[key].values : undefined;
     };
-    
+
+    /**
+     * usually used by grid column renderer
+     * @param key
+     * @returns {*}
+     */
     d.keymap = function (key) {
-        return dict_map[key];
+        return DICT_MAP[key] ? DICT_MAP[key].values : undefined;
     };
-    
+
     d.get_text = function (k, v) {
-        var dd = dict_map[k];
-        return dd && dd[v] ? dd[v]['text'] : '';
+        var dd = DICT_MAP[k];
+        return dd && dd.values[v] ? dd.values[v]['text'] : '';
     };
-    
+
     d.get_text_or = function (k, v, or) {
-        var dd = dict_map[k];
-        return dd && dd[v] ? dd[v]['text'] : or;
+        var dd = DICT_MAP[k];
+        return dd && dd.values[v] ? dd.values[v]['text'] : or;
     };
-    
+
+    /**
+     * a handy column renderer generator, usually used by grid column renderer
+     * @param {String} k the dict key/group name
+     * @returns {Function} an renderer function
+     */
     d.keyrenderer = function (k) {
         return function (v) {
             return d.get_text(k, v);
         }
+    };
+
+    var stores = [];
+
+    var uuid = new Ext.data.identifier.Uuid();
+
+
+    d.dictstore = function (dictname) {
+        var id = uuid.generate();
+        stores.push({
+            dict: dictname,
+            id: id,
+            type: 0
+        });
+        return Ext.create('Ext.data.Store', {
+            fields: ['value', 'text'],
+            data: d.keyset(dictname) || [],
+            storeId: id
+        });
+    };
+
+
+
+    d.nullabledictstore = function (dictname, nulltext, nullvalue) {
+        var item = [{value: nullvalue || '', text: nulltext}];
+        var data = item.concat(d.keyset(dictname) || []);
+        var id = uuid.generate();
+        stores.push({
+            dict: dictname,
+            id: id,
+            data: item,
+            type: 1
+        });
+        return Ext.create('Ext.data.Store', {
+            fields: ['value', 'text'],
+            data: data,
+            storeId: id
+        });
+    };
+
+    // TODO: pull database dicts, usually user definedable
+
+
+    d.init_remote_dict = function (callback) {
+        new Promise(function (resolve, reject) {
+            Ext.Ajax.request({
+                url: '../api/data/pull_app_dict',
+                success: function (resp, opts) {
+                    resolve(resp);
+                },
+                failure: function (resp, opts) {
+                    reject(resp);
+                }
+            });
+        }).then(function (resp) {
+            var data = Ext.JSON.decode(resp.responseText).data;
+            Ext.apply(DICT_SET, data);
+            Ext.apply(DICT_MAP, parse_key_set(data));
+            if (callback) {
+                callback();
+            }
+        }).catch(function (r) {
+            console.log(r);
+        });
+    };
+
+    d.init_remote_dict();
+
+    // TODO: only need to update remote fetched dict
+    function update_storemanager_cache() {
+        var s;
+
+        Ext.Array.each(stores, function (v) {
+            s = Ext.data.StoreManager.getByKey(v.id);
+            if (s) {
+                if (v.type === 0) {
+                    s.setData(DICT_SET[v.dict].values);
+                } else if (v.type === 1) {
+                    s.setData(v.data.concat(DICT_SET[v.dict].values));
+                }
+            }
+        });
     }
-    
+
+    d.pull_remote_dict = function () {
+        d.init_remote_dict(update_storemanager_cache);
+    }
+
 })(Ext);

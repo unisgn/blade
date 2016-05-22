@@ -10,7 +10,4 @@ import functools
 
 import tempfile
 
-f = tempfile.TemporaryFile('w+b')
-f.write(b'123456789')
-f.write(b'123456789')
-
+Base.metadata.create_all(engine)

@@ -7,7 +7,6 @@ Ext.define('Finetrust.view.project.BasicGrid', {
     requires: [
         'Ext.data.proxy.Ajax',
         'Ext.data.reader.Json',
-        'Finetrust.data.Dict',
         'Finetrust.model.Project',
         'Finetrust.view.EntityGrid'
     ],

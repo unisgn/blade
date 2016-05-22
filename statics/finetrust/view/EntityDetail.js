@@ -12,64 +12,52 @@ Ext.define('Finetrust.view.EntityDetail', {
 
     requires: [
         'Ext.button.Button',
+        'Ext.toolbar.Fill',
         'Finetrust.controller.EntityDetail'
     ],
 
     controller: 'entity-detail',
 
-
-
-    i18n: {
-        btn_reset: 'RESET',
-        btn_save: 'SAVE',
-        btn_save_and_new: 'SAVE & NEW',
-        msg_failure: 'FAILED: '
-    },
-
     config: {
-        readonly: false
+        readonly: false,
+        updatemode: false
+    },
+    
+    listeners: {
+        beforeclose: 'on_beforeclose',
+        scope: 'controller'
     },
 
-
-
-    initComponent: function () {
-        var me = this,
-            readonly = !!me.readonly;
-        if (!readonly) {
-            me.fbar = [
+    fbar: {
+        items: [
                 '->',
                 {
                     xtype: 'button',
-                    text: me.i18n.btn_reset,
-                    handler: 'on_btn_reset'
-                }, {
-                    xtype: 'button',
-                    text: me.i18n.btn_save,
+                    text: 'Save',
                     handler: 'on_btn_save'
                 }, {
                     xtype: 'button',
-                    text: me.i18n.btn_save_and_new,
+                    text: 'Save & New',
                     handler: 'on_btn_save_and_new'
                 }
-            ];
-
-        }
-        if (me.items) {
-                if (me.items.defaults) {
-                    me.items.defaults.readOnly = readonly;
-                } else {
-                    me.items.defaults = {
-                        readOnly: readonly
-                    };
-                }
-        }
-        
-        me.callParent();
-
+            ]
     },
-
-    beforeclose: function () {
-        //TODO: unsaved alert implement
-        this.callParent();
+    
+    initComponent: function () {
+        var me = this;
+        me.initReadonly();
+        me.callParent(arguments);
+    },
+    
+    initReadonly: function () {
+        var me = this;
+        if (me.getReadonly()) {
+            me.fbar = undefined;
+        }
+    },
+    
+    initUpdateMode: function() {
+        
     }
+    
 });

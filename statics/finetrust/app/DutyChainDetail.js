@@ -2,7 +2,7 @@
  * Created by 0xFranCiS on May 09, 2016.
  */
 
-Ext.define('Finetrust.app.DutyGroupDetail', {
+Ext.define('Finetrust.app.DutyChainDetail', {
     extend: 'Beaux.Application',
 
     requires: [
@@ -13,7 +13,7 @@ Ext.define('Finetrust.app.DutyGroupDetail', {
     statics: {
         launch: function (cfg) {
             var links = {
-                type: 'Finetrust.model.DutyGroup'
+                type: 'Finetrust.model.DutyChain'
             },
                 _cfg = cfg || {};
             if (_cfg.model) {

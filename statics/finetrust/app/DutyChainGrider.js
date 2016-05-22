@@ -1,7 +1,7 @@
 /**
  * Created by 0xFranCiS on Apr 26, 2015.
  */
-;Ext.define('Finetrust.app.DutyGroupGrider',  {
+;Ext.define('Finetrust.app.DutyChainGrider',  {
     extend: 'Beaux.Application',
 
     requires: [

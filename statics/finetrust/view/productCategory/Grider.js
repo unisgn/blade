@@ -3,74 +3,45 @@
  */
 
 Ext.define('Finetrust.view.productCategory.Grider', {
-    extend: 'Beaux.desktop.XWindow',
+    extend: 'Finetrust.view.EntityTreeGrid',
 
     requires: [
-        'Ext.data.TreeStore',
         'Ext.data.proxy.Ajax',
         'Ext.data.reader.Json',
-        'Ext.tree.Column',
         'Finetrust.model.ProductCategory',
         'Finetrust.view.EntityTreeGrid'
     ],
 
-    title: '产品目录',
-    
-    // items: {
-    //     xtype: 'entity-grid',
-    //     store: Ext.create('Ext.data.TreeStore', {
-    //         model: 'Finetrust.model.ProductCategory'
-    //     }),
-    //     columns: [{
-    //         xtype: 'treecolumn',
-    //         text: 'Name',
-    //         dataIndex: 'name'
-    //     }, {
-    //         text: 'brief',
-    //         dataIndex: 'brief'
-    //     }]
-    // },
 
-    initComponent: function () {
-        var me = this;
-        Ext.apply(me, {
-            items: [
-                Ext.create('Finetrust.view.EntityTreeGrid', {
-                    detailApp: 'Finetrust.app.ProductCategoryDetail',
-                    rootVisible: false,
-                    store: Ext.create('Ext.data.TreeStore', {
-                        model: 'Finetrust.model.ProductCategory',
-                        autoLoad: true,
+    detailApp: 'Finetrust.app.ProductCategoryDetail',
 
-                        parentIdProperty: 'parent_id',
-                        proxy: {
-                            type: 'ajax',
-                            url: '../api/tree/ProductCategory',
-                            reader: {
-                                type: 'json',
-                                rootProperty: 'data'
-                            }
-                        }
-                    }),
-                    columns: [{
-                        xtype: 'treecolumn',
-                        text: 'Name',
-                        dataIndex: 'name',
-                        flex: 2
-                    }, {
-                        text: 'code',
-                        dataIndex: 'code',
-                        flex: 1
-                    },{
-                        text: 'brief',
-                        dataIndex: 'brief',
-                        flex: 3
-                    }]
-                })
-            ]
-        });
+    store: {
+        model: 'Finetrust.model.ProductCategory',
+        autoLoad: true,
 
-        me.callParent();
+        parentIdProperty: 'parent_id',
+        proxy: {
+            type: 'ajax',
+            url: '../api/tree/ProductCategory',
+            reader: {
+                type: 'json',
+                rootProperty: 'data'
+            }
+        }
+    },
 
-    }
+    columns: [{
+        xtype: 'treecolumn',
+        text: 'Name',
+        dataIndex: 'name',
+        flex: 2
+    }, {
+        text: 'code',
+        dataIndex: 'code',
+        flex: 1
+    }, {
+        text: 'brief',
+        dataIndex: 'brief',
+        flex: 3
+    }]
 });

@@ -7,7 +7,8 @@ Ext.define('Finetrust.view.user.Detail', {
 
     requires: [
         'Ext.form.Panel',
-        'Finetrust.controller.UserDetail'
+        'Finetrust.controller.UserDetail',
+        'Finetrust.model.User'
     ],
 
     controller: 'user-detail',
@@ -20,18 +21,29 @@ Ext.define('Finetrust.view.user.Detail', {
     items: {
         xtype: 'form',
         defaultType: 'textfield',
-        defaults: {
-            readOnly: false
-        },
         items: [{
             fieldLabel: 'username',
             name: 'username',
             bind: '{data.username}'
-        },{
+        }, {
             fieldLabel: 'password',
             name: 'password',
             bind: '{data.password}'
+        }, {
+            fieldLabel: 'LastMod',
+            name: 'last_modified_date',
+            bind: '{data.last_modified_date}'
         }]
+    },
+
+    initReadonly: function () {
+        var me = this;
+        me.items.defaults = {
+            readOnly: me.getReadonly()
+        };
+        
+        me.callParent(arguments);
     }
+    
     
 });

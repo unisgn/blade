@@ -12,25 +12,12 @@ Ext.define('Finetrust.app.ProjectBasicDetail', {
 
     statics: {
         launch: function (cfg) {
-            var links = {
-                type: 'Finetrust.model.Project'
-            },
-                _cfg = cfg || {};
+            Ext.apply(cfg, {
+                viewModel:  this.viewmodel_cfg(cfg, 'Finetrust.model.Project'),
+                readonly: !!cfg.readonly
+            });
 
-            if (_cfg.id) {
-                links.id = _cfg.model;
-            } else {
-                links.create = true;
-            }
-
-            Ext.create('Finetrust.view.project.BasicDetail', {
-                viewModel: Ext.create('Ext.app.ViewModel', {
-                    links: {
-                        data: links
-                    }
-                }),
-                readonly: !!_cfg.readonly
-            }).show();
+            Ext.create('Finetrust.view.project.BasicDetail', cfg).show();
         }
     }
 });

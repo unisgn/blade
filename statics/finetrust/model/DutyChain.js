@@ -2,7 +2,7 @@
  * Created by 0xFranCiS on May 17, 2016.
  */
 
-;Ext.define('Finetrust.model.DutyGroup', {
+;Ext.define('Finetrust.model.DutyChain', {
     extend:'Finetrust.model.BaseEntity',
     fields:[
         {name:'code', type:'string'},

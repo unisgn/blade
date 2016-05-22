@@ -6,39 +6,34 @@ Ext.define('Finetrust.view.QueryPanel', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Ext.button.Button'
+        'Ext.button.Button',
+        'Finetrust.controller.QueryPanel'
     ],
+
+    controller: 'query-panel',
 
     // closable: false,
     closeAction: 'hide',
 
 
-    initComponent: function () {
-        var me = this;
-        Ext.apply(me, {
-            fbar: {
-                items: [{
-                    type:'button',
-                    text: 'RESET',
-                    handler: function () {
-                        var vm = me.getViewModel();
-                        var init = vm.getInitialConfig().data;
-                        vm.setData(init);
-                    }
-                },{
-                    type: 'button',
-                    text: 'Query',
-                    handler: function () {
-                        me.fireEvent('criteriaready');
-                    }
-                }]
-            }
-        });
+    /**
+     * @event criteriaready
+     */
 
-        me.callParent();
+    fbar: {
+        items: [{
+            type: 'button',
+            text: 'RESET',
+            handler: 'on_btn_reset'
+        }, {
+            type: 'button',
+            text: 'Query',
+            handler: 'on_btn_query'
+        }]
     },
 
     createCriteria: function () {
-        
+
     }
+    
 });

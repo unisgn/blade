@@ -29,13 +29,12 @@ def logout():
     pass
 
 
-
-def parse_query(query):
+def parse_criteria(query):
     q = query
     req = ctx.request
-    start = req['start']
-    limit = req['limit']
-    filters = req.input('filter')
+    start = req.args['start']
+    limit = req.args['limit']
+    filters = req.args.get('filter', None)
     if filters:
         filters = demjson.decode(filters)
         for f in filters:
@@ -52,8 +51,7 @@ def parse_query(query):
 def get_users():
 
     with open_session() as session:
-        q = session.query(User)
-        q = parse_query(q)
+        q = session.query(User).order_by(User.username.asc())
         rs = q.all()
         return [e.__json__() for e in rs]
 
@@ -66,6 +64,7 @@ def get_users():
 def add_user():
     vo = ctx.request.json
     po = User(**vo)
+    po.last_modified_date = int(time.time())
     with open_session() as session:
         session.add(po)
         session.commit()
@@ -88,11 +87,14 @@ def get_user(id):
 def update_user(id):
     vo = ctx.request.json
     with open_session() as session:
-        po = session.query(User).filter(User.id == id)
-        po.update_vo(vo)
-        session.add(po)
-        session.commit()
-        return po.__json__()
+        po = session.query(User).filter(User.username == id).one()
+        if po:
+            po.update_vo(vo)
+            po.last_modified_date = int(time.time())
+            session.add(po)
+            session.commit()
+            return po.__json__()
+
 
 # @secured('user_mgr')
 @route('/api/User/<id>', method='delete')
@@ -140,15 +142,11 @@ def update_product_category(id):
     with open_session() as session:
         vo = ctx.request.json
         po = session.query(ProductCategory).filter(ProductCategory.id == id).one_or_none()
-        po.update_vo(vo)
-        if vo['parent_id']:
-            parent = session.query(ProductCategory).filter(ProductCategory.id == id).one_or_none()
-            po.parent = parent
-        else:
-            po.parent = None
-        session.add(po)
-        session.commit()
-        return po.__json__()
+        if po:
+            po.update_vo(vo)
+            session.add(po)
+            session.commit()
+            return po.__json__()
 
 
 @route('/api/ProductCategory/<id>', method='delete')
@@ -534,7 +532,7 @@ def get_product_category_dict():
 @route('/api/Attachment/')
 @restful
 def get_attachments():
-    fkid = ctx.request.form.getvalue('fkid')
+    fkid = ctx.request.args['fkid']
     if fkid:
         with open_session() as s:
             rs = s.query(Attachment.id, Attachment.fname, Attachment.fkid, Attachment.upload_date)\
@@ -543,29 +541,32 @@ def get_attachments():
             return rs
 
 
-@route('/api/Attachment/<id>', method='delete')
+@route('/api/Attachment/remove', method='post')
 @restful
-def remove_attachment(id):
-    with open_session() as s:
-        po = s.query(Attachment).filter(Attachment.id == id).one_or_none()
-        if po:
-            fpath = po.fpath
-            os.remove(fpath)
-            s.delete(po)
+def remove_attachment():
+    fid = ctx.request.json['id']
+    if fid:
+        with open_session() as s:
+            po = s.query(Attachment).filter(Attachment.id == fid).one_or_none()
+            if po:
+                fpath = po.fpath
+                os.remove(fpath)
+                s.delete(po)
 
 
 
 @route('/download')
 def download():
-    sid = ctx.request.form.getvalue('fid')
-    with open_session() as s:
-        atta = s.query(Attachment).filter(Attachment.id == sid).one_or_none()
-        if atta:
-            path = atta.fpath
-            fname = atta.fname
-            ctx.response.content_type = 'application/octet-stream'
-            ctx.response.header('Content-Disposition', 'attachment;filename=%s' % parse.quote(fname))
-            return static_file_generator(path)
+    fid = ctx.request.args['fid']
+    if fid:
+        with open_session() as s:
+            atta = s.query(Attachment).filter(Attachment.id == fid).one_or_none()
+            if atta:
+                path = atta.fpath
+                fname = atta.fname
+                ctx.response.content_type = 'application/octet-stream'
+                ctx.response.header('Content-Disposition', 'attachment;filename=%s' % parse.quote(fname))
+                return static_file_generator(path)
 
 
 @route('/upload', method='POST')
@@ -574,52 +575,60 @@ def upload():
         'success': True,
         'msg': 'ok'
     }
-    form = ctx.request.form
-    fkid = form.getvalue('fkid')
+    req = ctx.request
+    fkid = req.args['fkid']
     if fkid:
-        for k in form:
-            v = form[k]
-            if v.filename:
-                fname = v.filename
-                fid = str(uuid.uuid1())
-                dest_path = '/home/yinlan/uploads/%s' % fid
-                try:
-                    with open(dest_path, 'wb') as dest:
-                        src = v.file
-                        while 1:
-                            buf = src.read(8192)
-                            if buf:
-                                dest.write(buf)
-                            else:
-                                break
-                    with open_session() as s:
-                        po = Attachment()
-                        po.id = fid
-                        po.fkid = fkid
-                        po.fname = fname
-                        po.fpath = dest_path
-                        po.upload_date = int(time.time())
-                        s.add(po)
-                        s.commit()
-                        ret['data'] = {
-                            'id': fid,
-                            'fkid': fkid,
-                            'fname': fname,
-                            'upload_date': po.upload_date
-                        }
-                except Exception as e:
-                    msg = str(e)
-                    if os.path.exists(dest_path):
-                        os.remove(dest_path)
-                    ret['success'] = False
-                    ret['msg'] = msg
-                    print(msg )
+        for name, fs in req.files.items():
+            fname = fs.filename
+            fid = str(uuid.uuid1())
+            dest_path = '/home/yinlan/uploads/%s' % fid
+            try:
+                fs.save(dest_path)
+                req.close()
+                with open_session() as s:
+                    po = Attachment()
+                    po.id = fid
+                    po.fkid = fkid
+                    po.fname = fname
+                    po.fpath = dest_path
+                    po.upload_date = int(time.time())
+                    s.add(po)
+                    s.commit()
+                    ret['data'] = {
+                        'id': fid,
+                        'fkid': fkid,
+                        'fname': fname,
+                        'upload_date': po.upload_date
+                    }
+            except Exception as e:
+                msg = str(e)
+                if os.path.exists(dest_path):
+                    os.remove(dest_path)
+                ret['success'] = False
+                ret['msg'] = msg
+                print(msg)
 
     else:
         ret['success'] = False
         ret['msg'] = 'no fkid found'
     return demjson.encode(ret)
 
+
+@route('/api/data/pull_app_dict')
+@restful
+def pull_app_dict():
+    rv = {}
+
+    def update_dict(dictname, resultset):
+        rv[dictname] = {
+            'values': [{'value': e[0], 'text': e[1]} for e in resultset]
+        }
+    with open_session() as s:
+        rs = s.query(Duty.id, Duty.name).all()
+        update_dict('duty', rs)
+        rs = s.query(ProductCategory.id, ProductCategory.name).filter(ProductCategory.parent_id.is_(None)).all()
+        update_dict('root_product_category', rs)
+    return rv
 
 # @intercept('/')
 # def all_intercept(next_fn):

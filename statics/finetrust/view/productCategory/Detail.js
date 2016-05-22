@@ -6,16 +6,12 @@ Ext.define('Finetrust.view.productCategory.Detail', {
     extend: 'Finetrust.view.EntityDetail',
 
     requires: [
-        'Ext.data.Store',
-        'Ext.data.proxy.Ajax',
-        'Ext.data.reader.Json',
         'Ext.form.Panel',
-        'Ext.form.field.ComboBox',
-        'Finetrust.model.ProductCategory'
+        'Ext.form.field.ComboBox'
     ],
 
     controller: 'entity-detail',
-    
+
     items: {
         xtype: 'form',
         defaultType: 'textfield',
@@ -25,24 +21,16 @@ Ext.define('Finetrust.view.productCategory.Detail', {
         items: [{
             xtype: 'combobox',
             fieldLabel: 'Parent',
-            name: 'parent',
-            store: Ext.create('Ext.data.Store', {
-                model: 'Finetrust.model.ProductCategory',
-                proxy: {
-                    type: 'ajax',
-                    url: '../api/dict/ProductCategory',
-                    reader: {
-                        type: 'json',
-                        rootProperty: 'data'
-                    }
-                },
-                autoLoad: true
-            }),
+            name: 'parent_id',
+            store: Finetrust.data.Dict.dictstore('root_product_category'),
             queryMode: 'local',
-            valueField: 'id',
-            displayField: 'name',
-            bind: '{data.parent_id}'
-        },{
+            anyMatch: true,
+            valueField: 'value',
+            displayField: 'text',
+            bind: {
+                value: '{data.parent_id}'
+            }
+        }, {
             fieldLabel: 'code',
             name: 'code',
             bind: '{data.code}'
@@ -54,11 +42,20 @@ Ext.define('Finetrust.view.productCategory.Detail', {
             fieldLabel: 'brief',
             name: 'brief',
             bind: '{data.brief}'
-        },{
+        }, {
             fieldLabel: 'fullname',
             name: 'fullname',
             bind: '{data.fullname}',
             readOnly: true
         }]
+    },
+
+    initReadonly: function () {
+        var me = this;
+        me.items.defaults = {
+            readOnly: me.getReadonly()
+        };
+
+        me.callParent(arguments);
     }
 });

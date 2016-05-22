@@ -19,6 +19,8 @@ from util import jsonify
 import demjson
 import cgi
 
+from werkzeug.wrappers import BaseRequest
+
 HTTP_STATUSES = {
     100: ''
 }
@@ -107,39 +109,28 @@ class MultipartFile:
         self.file = storage.file
 
 
-class Request:
+def _get_data(req, cache):
+    getter = getattr(req, 'get_data', None)
+    if getter is not None:
+        return getter(cache=cache)
+    return req.data
+
+
+class Request(BaseRequest):
     def __init__(self, environ):
+        super().__init__(environ, populate_request=False)
         self._environ = environ
 
     @property
     def json(self):
         if not hasattr(self, '_json'):
-            if self.body:
-                self._json = demjson.decode(self.body)
-            else:
-                self._json = None
+            data = _get_data(self, True)
+            self._json = demjson.decode(data)
         return self._json
-
-    @property
-    def body(self):
-        if not hasattr(self, '_body'):
-            try:
-                length = int(self._environ.get('CONTENT_LENGTH', '0'))
-            except ValueError:
-                length = 0
-            if length > 0:
-                self._body = self._environ['wsgi.input'].read(length)
-            else:
-                self._body = None
-        return self._body
 
     @property
     def method(self):
         return self._environ['REQUEST_METHOD']
-
-    @property
-    def path(self):
-        return self._environ['PATH_INFO'].rstrip('/')
 
     @property
     def query_string(self):
@@ -160,20 +151,6 @@ class Request:
 
     def cookie(self, name):
         return self.cookies.get(name, None)
-
-    @property
-    def environ(self):
-        return self._environ
-
-    @property
-    def form(self):
-        if not hasattr(self, '_raw_input'):
-            fs = cgi.FieldStorage(fp=self._environ['wsgi.input'], environ=self._environ, keep_blank_values=True)
-            self._raw_input = fs
-        return self._raw_input
-
-    def input(self, key):
-        return self.form.getvalue(key)
 
 
 

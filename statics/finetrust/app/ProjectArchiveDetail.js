@@ -42,8 +42,11 @@ Ext.define('Finetrust.app.ProjectArchiveDetail', {
                         attachments: {
                             model: 'Finetrust.model.Attachment',
                             proxy: {
-                                type: 'rest',
+                                type: 'ajax',
                                 url: '/api/Attachment',
+                                api: {
+                                    destroy: '/api/Attachment/remove'
+                                },
                                 extraParams: {
                                     fkid: model.getId()
                                 },

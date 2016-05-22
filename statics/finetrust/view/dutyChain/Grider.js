@@ -9,7 +9,7 @@ Ext.define('Finetrust.view.dutyChain.Grider', {
     title: '审批链设置',
 
     requires: [
-        'Finetrust.model.DutyGroup',
+        'Finetrust.model.DutyChain',
         'Finetrust.model.Duty',
         'Finetrust.view.EntityGrid'
     ],
@@ -17,9 +17,9 @@ Ext.define('Finetrust.view.dutyChain.Grider', {
 
     items: {
         xtype: 'entity-grid',
-        detailApp: 'Finetrust.app.DutyGroupDetail',
+        detailApp: 'Finetrust.app.DutyChainDetail',
         store: {
-            model: 'Finetrust.model.DutyGroup',
+            model: 'Finetrust.model.DutyChain',
             autoLoad: true
         },
         columns: [{

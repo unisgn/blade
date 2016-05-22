@@ -21,6 +21,8 @@
         scope: 'controller' // IMPORTANT
     },
 
+    rootVisible: false,
+
 
     /**
      * @type {Beaux.desktop.XWindow}
@@ -35,7 +37,9 @@
          */
         menus: Ext.create('Ext.util.HashMap'),
         
-        detailApp: undefined
+        detailApp: undefined,
+        
+        readonly: false
     },
     
 
@@ -78,7 +82,7 @@
                         scope: me.getController()
                     }]
                 });
-                me.menus.add(menu);
+                me.menus.add(menuId, menu);
             } else {
                 menu = me.menus.get(menuId);
             }
@@ -94,7 +98,6 @@
         if (!readonly) {
             if (!me.menus.get(menuId)) {
                 menu = Ext.create('Ext.menu.Menu', {
-                    controller: me.getController(),
                     items: [{
                         text: '新建',
                         handler: 'on_menu_new',
@@ -105,7 +108,7 @@
                         scope: me.getController()
                     }]
                 });
-                me.menus.add(menu);
+                me.menus.add(menuId, menu);
             } else {
                 menu = me.menus.get(menuId);
             }
@@ -122,8 +125,10 @@
         me.menus.each(function (key, val, len) {
             val.destroy();
         });
+        
+        me.menus.clear();
 
-        me.callParent();
+        me.callParent(arguments);
     }
 
 });

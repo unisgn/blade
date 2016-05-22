@@ -5,6 +5,7 @@
     extend: 'Beaux.Application',
 
     requires: [
+        'Beaux.desktop.XWindow',
         'Finetrust.view.user.Grider'
     ],
     
@@ -14,7 +15,10 @@
             if (me.xwindow) {
                 me.xwindow.toFront();
             } else {
-                me.xwindow = Ext.create('Finetrust.view.user.Grider');
+                me.xwindow = Ext.create('Beaux.desktop.XWindow', {
+                    title: '用户管理',
+                    items: Ext.create('Finetrust.view.user.Grider')
+                });
                 me.xwindow.on({
                     destroy: function () {
                         me.xwindow = undefined;

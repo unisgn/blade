@@ -12,23 +12,15 @@ Ext.define('Finetrust.app.UserDetail', {
 
     statics: {
         launch: function (cfg) {
-            var links = {
-                type: 'Finetrust.model.User'
-            },
-                _cfg = cfg || {};
-            if (_cfg.id) {
-                links.id = _cfg.model;
-            } else {
-                links.create = true;
-            }
-            Ext.create('Finetrust.view.user.Detail', {
-                viewModel: Ext.create('Ext.app.ViewModel', {
-                    links: {
-                        data: links
-                    }
-                }),
-                readonly: !!_cfg.readonly
-            }).show();
+            var me = this, cfg = cfg || {};
+            Ext.apply(cfg, {
+                viewModel: Ext.create('Ext.app.ViewModel',
+                    me.viewmodel_cfg(cfg, 'Finetrust.model.User')
+                ),
+                readonly: !!cfg.readonly
+            });
+
+            Ext.create('Finetrust.view.user.Detail', cfg).show();
         }
     }
 });

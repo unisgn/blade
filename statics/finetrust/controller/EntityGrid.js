@@ -5,7 +5,7 @@
 Ext.define('Finetrust.controller.EntityGrid', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.entity-grid',
-    
+
 
     // init: function () {
     //     var users = [
@@ -26,9 +26,9 @@ Ext.define('Finetrust.controller.EntityGrid', {
             menu.showAt(e.getXY());
             return false;
         }
-        
+
     },
-   
+
 
     on_itemdblclick: function (dom, record, item, idx, e) {
         e.stopEvent();
@@ -37,6 +37,7 @@ Ext.define('Finetrust.controller.EntityGrid', {
     },
 
     on_containercontextmenu: function (dom, e) {
+
         var view = this.getView(), readonly = !!view.readonly, menu = view.getContainerContextMenu();
         if (!readonly && menu) {
             e.stopEvent();
@@ -44,7 +45,7 @@ Ext.define('Finetrust.controller.EntityGrid', {
             return false;
         }
     },
-    
+
     on_menu_view: function () {
         var me = this, view = me.getView(), record = view.getSingleSelection();
         if (record) {
@@ -52,32 +53,32 @@ Ext.define('Finetrust.controller.EntityGrid', {
         }
     },
 
-    
+
     on_menu_edit: function () {
         var me = this, view = me.getView(), record = view.getSingleSelection();
         if (record) {
             me.launch_detail(record, false);
         }
     },
-    
+
     on_menu_new: function () {
         this.launch_detail();
     },
-    
+
     on_menu_remove: function () {
         var me = this, view = me.getView(), record = view.getSingleSelection();
         if (record) {
             me.remove_entity(record);
         }
     },
-    
+
     on_menu_refresh: function () {
         this.refresh_page();
     },
-    
-    
-    
-    
+
+    on_menu_sync: function () {
+        this.getView().getStore().sync();
+    },
     /**
      *
      * @param {String|Number|Ext.data.Model} [model] - the model of the record
@@ -88,29 +89,30 @@ Ext.define('Finetrust.controller.EntityGrid', {
         if (detailApp) {
             Beaux.launch(detailApp, {
                 model: model,
-                readonly: readonly
+                readonly: !!readonly
             });
+        } else {
+            Ext.warn('no detailApp found in view');
         }
-        
     },
 
     launch_query_panel: function () {
-        var p = this.getView().getQueryPanel();
-        p && p.show && p.show();
+        var me = this,
+            view = me.getView(),
+            qp = view.getQueryPanel();
+        if (!qp) {
+            qp = view.initQueryPanel();
+        }
+        qp && qp.show();
     },
 
 
     /**
-     * 
+     *
      * @param {Ext.data.Model} record
      */
-    remove_entity: function(record) {
-        var me = this;
-        record.erase({
-            callback: function () {
-                me.getView().getStore().reload();
-            }
-        });
+    remove_entity: function (record) {
+        this.getView().getStore().remove(record);
     },
 
     on_criteria_ready: function () {
@@ -123,11 +125,80 @@ Ext.define('Finetrust.controller.EntityGrid', {
             store.reload();
         }
         // store.reload(); // already auto loaded
-        
+
     },
-    
+
     refresh_page: function () {
         this.getView().getStore().reload();
+    },
+
+    reset_inline_criteria: function () {
+        var me = this;
+        vm = me.getViewModel();
+        data = vm.getData();
+        Ext.Object.each(data, function (k, v, o) {
+            vm.set(k, undefined);
+        });
+        this.query_by_inline_criteria();
+    },
+
+    request_inline_criteria: function (cmp, e, eOpt) {
+        if (e.keyCode === 13) {
+            this.query_by_inline_criteria();
+        }
+    },
+
+    query_by_inline_criteria: function () {
+        var me = this, vm = me.getViewModel();
+        console.log(vm.getData());
+    },
+
+    on_afterrender: function (cmp) {
+        var me = cmp, readonly = !!me.readonly;
+
+        if (!readonly) {
+            if (me.keymap) {
+                me.keymap.addBinding({
+                    key: 's',
+                    shift: true,
+                    handler: function () {
+                        me.getController().launch_query_panel();
+                    },
+                    ignoreInputFields: true
+                });
+            } else {
+                me.keymap = Ext.create('Ext.KeyMap', {
+                    target: me.getEl(),
+                    binding: [{
+                        key: 's',
+                        shift: true,
+                        handler: function () {
+                            me.getController().launch_query_panel();
+                        }
+                    }],
+                    ignoreInputFields: true
+                });
+            }
+        }
+    },
+
+    on_destroy: function (cmp) {
+        var me = cmp;
+        me.keymap && me.keymap.destroy();
+
+        me.menus.each(function (key, val, len) {
+            val.destroy();
+        });
+        me.menus.clear();
+
+        Ext.destroy(me.queryPanel);
+
+    },
+    
+    on_beforeclose: function () {
+        if (!Ext.Object.isEmpty(this.get_record())) {
+            Ext.Msg.alert('');
+        }
     }
 
 });

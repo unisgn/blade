@@ -6,40 +6,56 @@ Ext.define('Finetrust.controller.EntityDetail', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.entity-detail',
 
-    on_btn_reset: function () {
-        var me = this;
-        var vm = me.getViewModel();
-        vm.setLinks(vm.getInitialConfig().links);
+    get_record: function () {
+        return this.getViewModel().getData().data;
     },
 
     on_btn_save: function () {
-        var me = this, view = me.getView(), data = view.getViewModel().getData().data;
-        view.setLoading(true);
-        data.save({
-            callback: function (record, op, success) {
-                view.setLoading(false);
-            }
-        });
+        var me = this,
+            view = me.getView(),
+            rec = me.get_record();
+        if (!Ext.Object.isEmpty(rec.modified)) {
+            view.setLoading(true);
+            rec.save({
+                callback: function () {
+                    view.setLoading(false);
+                }
+            });
+        }
     },
 
 
     on_btn_save_and_new: function () {
+        var me = this,
+            view = me.getView(),
+            rec = me.get_record();
+        if (!Ext.Object.isEmpty(rec.modified)) {
+            view.setLoading(true);
+            rec.save({
+                callback: function () {
+                    view.setLoading(false);
+                    me.issue_new_record();
+                }
+            });
+        } else {
+            me.issue_new_record();
+        }
+    },
 
-        var me = this, view = me.getView(), vm = me.getViewModel(), data = vm.getData().data, initLinks = vm.getInitialConfig();
-        view.setLoading(true);
-        data.save({
-            callback: function (record, op, success) {
-                view.setLoading(false);
-
-                var links = {
-                    data: {
-                        type: initLinks.links.data.type,
-                        create: true
-                    }
-                };
-                vm.setLinks(links);
-            }
+    issue_new_record: function () {
+        var me = this,
+            vm = me.getViewModel(),
+            clz = Ext.getClass(vm.getData().data);
+        vm.setData({
+            data: new clz()
         });
 
+    },
+
+    on_beforeclose: function () {
+        //TODO: unsaved alert
+        // if (!Ext.Object.isEmpty(this.get_record())) {
+        //     Ext.Msg.alert('');
+        // }
     }
 });

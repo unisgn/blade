@@ -24,14 +24,20 @@
         itemdblclick: 'on_itemdblclick',
         containercontextmenu: 'on_containercontextmenu',
         criteriaready: 'on_criteria_ready',
+        afterrender: 'on_afterrender',
+        destroy: 'on_destroy',
         scope: 'controller' // IMPORTANT
     },
 
     selModel: {
         mode: 'SINGLE',
-        allowDeselect: true
+        // allowDeselect: true
     },
 
+    viewConfig: {
+        stripeRows: true,
+        // enableTextSelection: true
+    },
 
     config: {
 
@@ -71,24 +77,26 @@
         readonly: false
     },
 
-
-    initComponent: function () {
-        var me = this, readonly = !!me.readonly;
-
-        me.callParent();
-
-        if (!readonly && me.queryPanel) {
-            me.queryPanel.on({
-                criteriaready: function () {
-                    me.fireEvent('criteriaready');
-                    me.queryPanel.hide();
-                }
-            });
-        }
+    /**
+     * @abstract
+     */
+    createQueryPanel: function () {
 
     },
 
-    getSingleSelection: function() {
+    initQueryPanel: function () {
+        var me = this, qp = me.getQueryPanel();
+        if (!qp) {
+            qp = me.createQueryPanel();
+            if (qp) {
+                qp.on('criteriaready', me.getController().on_criteria_ready);
+                me.setQueryPanel(qp);
+            }
+        }
+        return qp;
+    },
+
+    getSingleSelection: function () {
         var me = this, sel = me.getSelection();
         if (sel.length > 0) {
             return sel[0];
@@ -126,15 +134,19 @@
                         text: '刷新',
                         handler: 'on_menu_refresh',
                         scope: me.getController()
+                    }, {
+                        text: '同步',
+                        handler: 'on_menu_sync',
+                        scope: me.getController()
                     }]
                 });
-                me.menus.add(menu);
+                me.menus.add(menuId, menu);
             } else {
                 menu = me.menus.get(menuId);
             }
             return menu;
         }
-        
+
     },
 
     getContainerContextMenu: function () {
@@ -152,63 +164,18 @@
                         text: '刷新',
                         handler: 'on_menu_refresh',
                         scope: me.getController()
+                    }, {
+                        text: '同步',
+                        handler: 'on_menu_sync',
+                        scope: me.getController()
                     }]
                 });
-                me.menus.add(menu);
+                me.menus.add(menuId, menu);
             } else {
                 menu = me.menus.get(menuId);
             }
             return menu;
         }
-    },
-
-    /**
-     * @override
-     */
-    afterRender: function () {
-        var me = this, readonly = !!me.readonly;
-
-        if (!readonly) {
-            if (me.keymap) {
-                me.keymap.addBinding({
-                    key: 's',
-                    shift: true,
-                    handler: function () {
-                        me.getController().launch_query_panel();
-                    }
-                });
-            } else {
-                me.keymap = Ext.create('Ext.KeyMap', {
-                    target: me.getEl(),
-                    binding: [{
-                        key: 's',
-                        shift: true,
-                        handler: function () {
-                            me.getController().launch_query_panel();
-                        }
-                    }]
-                });
-            }
-        }
-        
-
-
-
-        me.callParent();
-    },
-
-    /**
-     * @override
-     */
-    onDestroy: function () {
-        var me = this;
-        me.keymap && me.keymap.destroy();
-
-        me.menus.each(function (key, val, len) {
-            val.destroy();
-        });
-
-        me.callParent();
     }
 
 });
