@@ -89,7 +89,7 @@ ENV/
 # Rope project settings
 .ropeproject
 
-statics/beaux/
-statics/extjs5/
+statics/beaux
+statics/extjs5
 
-.idea/
+.idea
