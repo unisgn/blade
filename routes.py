@@ -16,6 +16,8 @@ import time
 
 from urllib import parse
 
+
+
 @route('/login/<name>')
 @restful
 def login(name):
@@ -143,6 +145,12 @@ def update_product_category(id):
         vo = ctx.request.json
         po = session.query(ProductCategory).filter(ProductCategory.id == id).one_or_none()
         if po:
+            new_parent_id = vo.get('parent_id')
+            if new_parent_id:
+                new_parent = session.query(ProductCategory).filter(ProductCategory.id == new_parent_id).one()
+                po.parent = new_parent
+            else:
+                po.parent = None
             po.update_vo(vo)
             session.add(po)
             session.commit()
@@ -430,6 +438,138 @@ def update_duty_group(id):
             return po.__json__()
 
 
+@route('/api/Organization', method='post')
+@restful
+def add_organization():
+    vo = ctx.request.json
+    po = Organization()
+    with open_session() as s:
+        parent_id = vo.get('parent_id', None)
+        if parent_id:
+            parent = s.query(Organization).filter(Organization.id == parent_id).one()
+            po.parent = parent
+        else:
+            po.parent = None
+        po.update_vo(vo)
+        s.add(po)
+        parent = po.parent
+        po.parent = parent
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+
+
+@route('/api/Organization/<id>', method='put')
+@restful
+def update_organization(id):
+    with open_session() as s:
+        po = s.query(Organization).filter(Organization.id == id).one()
+        if po:
+            vo = ctx.request.json
+            parent_id = vo.get('parent_id', None)
+            parent = s.query(Organization).filter(Organization.id == parent_id).one_or_none()
+            po.parent = parent
+            po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+@route('/api/Organization/<id>')
+@restful
+def get_organization(id):
+    with open_session() as s:
+        po = s.query(Organization).filter(Organization.id == id).one_or_none()
+        if po:
+            return po.__json__()
+
+
+@route('/api/ProjectPreAccount')
+@restful
+def get_project_pre_account_list():
+    parent_id = ctx.request.args['project_id']
+    with open_session() as s:
+        rs = s.query(ProjectPreAccount).filter(ProjectPreAccount.project_id == parent_id).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/ProjectPreAccount', method='post')
+@restful
+def add_project_pre_account():
+    vo = ctx.request.json
+    with open_session() as s:
+        po = ProjectPreAccount()
+        po.update_vo(ctx.request.json)
+        po.project_id = ctx.request.args['project_id']
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+@route('/api/ProjectPreAccount/<id>', method='put')
+@restful
+def update_project_pre_account(id):
+    with open_session() as s:
+        po = s.query(ProjectPreAccount).filter(ProjectPreAccount.id == id).one()
+        if po:
+            po.update_vo(ctx.request.json)
+            po.project_id = ctx.request.args['project_id']
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+@route('/api/ProjectPreAccount/<id>', method='delete')
+@restful
+def remove_project_pre_account(id):
+    with open_session() as s:
+        po = s.query(ProjectPreAccount).filter(ProjectPreAccount.id == id).one()
+        if po:
+            s.delete(po)
+
+
+
+
+@route('/api/ProjectAgent')
+@restful
+def get_project_agent_list():
+    project_id = ctx.request.args['project_id']
+    with open_session() as s:
+        rs = s.query(ProjectAgent).filter(ProjectAgent.project_id == project_id).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/ProjectAgent', method='post')
+@restful
+def add_project_agent():
+    with open_session() as s:
+        po = ProjectAgent()
+        po.update_vo(ctx.request.json)
+        po.project_id = ctx.request.args['project_id']
+        s.add(po)
+        s.commit()
+        return po.__json__()
+
+@route('/api/ProjectAgent/<id>', method='put')
+@restful
+def update_project_agent(id):
+    vo = ctx.request.json
+    with open_session() as s:
+        po = s.query(ProjectAgent).filter(ProjectAgent.id == id).one()
+        if po:
+            po.update_vo(vo)
+            po.project_id = ctx.request.args['project_id']
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+@route('/api/ProjectAgent/<id>', method='delete')
+@restful
+def remove_project_agent(id):
+    with open_session() as s:
+        po = s.query(ProjectAgent).filter(ProjectAgent.id == id).one()
+        if po:
+            s.delete(po)
 
 
 @route('/api/data/project/basic')
@@ -513,10 +653,18 @@ def get_project_archive():
 
 @route('/api/tree/ProductCategory')
 @restful
-def get_product_category_node():
+def get_product_category_tree():
     with open_session() as session:
-        q = session.query(ProductCategory)
-        return [o.__json__() for o in q.all()]
+        rs = session.query(ProductCategory).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/tree/Organization')
+@restful
+def get_organization_tree():
+    with open_session() as s:
+        rs = s.query(Organization).all()
+        return [e.__json__() for e in rs]
 
 
 
@@ -541,17 +689,15 @@ def get_attachments():
             return rs
 
 
-@route('/api/Attachment/remove', method='post')
+@route('/api/Attachment/<id>', method='delete')
 @restful
-def remove_attachment():
-    fid = ctx.request.json['id']
-    if fid:
-        with open_session() as s:
-            po = s.query(Attachment).filter(Attachment.id == fid).one_or_none()
-            if po:
-                fpath = po.fpath
-                os.remove(fpath)
-                s.delete(po)
+def remove_attachment(id):
+    with open_session() as s:
+        po = s.query(Attachment).filter(Attachment.id == id).one_or_none()
+        if po:
+            fpath = po.fpath
+            os.remove(fpath)
+            s.delete(po)
 
 
 
@@ -628,27 +774,28 @@ def pull_app_dict():
         update_dict('duty', rs)
         rs = s.query(ProductCategory.id, ProductCategory.name).filter(ProductCategory.parent_id.is_(None)).all()
         update_dict('root_product_category', rs)
+        rs = s.query(Organization.id, Organization.name).all()
+        update_dict('organization', rs)
     return rv
-
-# @intercept('/')
-# def all_intercept(next_fn):
-#     print('before all intercept')
-#     try:
-#         return next_fn()
-#     finally:
-#         print('after all intercept')
-
-
-# @intercept('/admin')
-# def check_admin(next_fn):
-#     print('before admin interceptor')
-#     try:
-#         return next_fn()
-#     finally:
-#         print('after admin interceptor')
+#
+# # @intercept('/')
+# # def all_intercept(next_fn):
+# #     print('before all intercept')
+# #     try:
+# #         return next_fn()
+# #     finally:
+# #         print('after all intercept')
+#
+#
+# # @intercept('/admin')
+# # def check_admin(next_fn):
+# #     print('before admin interceptor')
+# #     try:
+# #         return next_fn()
+# #     finally:
+# #         print('after admin interceptor')
 
 
 @route('/admin')
 def admin():
-    print('hello, admin')
-    return 'hallo'
+    return '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789'

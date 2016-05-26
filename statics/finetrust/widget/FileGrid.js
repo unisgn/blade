@@ -23,7 +23,8 @@ Ext.define('Finetrust.widget.FileGrid', {
     ],
 
     config: {
-        fkid: undefined
+        fkid: undefined,
+        readonly: false
     },
 
 
@@ -77,5 +78,15 @@ Ext.define('Finetrust.widget.FileGrid', {
                 }]
             }]
         }
-    }]
+    }],
+
+    initComponent: function () {
+        var me = this;
+
+        if (me.readonly) {
+            me.tbar = undefined;
+        }
+
+        me.callParent();
+    }
 });

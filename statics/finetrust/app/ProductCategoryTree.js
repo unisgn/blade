@@ -16,6 +16,7 @@ Ext.define('Finetrust.app.ProductCategoryTree', {
                 me.xwin.toFront();
             } else {
                 me.xwin = Ext.create('Beaux.desktop.XWindow', {
+                    title: '产品分类树',
                     items: Ext.create('Finetrust.view.productCategory.Grider')
                 });
                 me.xwin.on({

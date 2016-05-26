@@ -16,8 +16,8 @@ Ext.define('Finetrust.app.ProjectEssentialDetail', {
             },
                 _cfg = cfg || {};
 
-            if (_cfg.id) {
-                links.id = _cfg.model;
+            if (_cfg.model && _cfg.model.getId) {
+                links.id = _cfg.model.getId();
             } else {
                 links.create = true;
             }

@@ -30,12 +30,12 @@
     },
 
     selModel: {
-        mode: 'SINGLE',
+        mode: 'SINGLE'
         // allowDeselect: true
     },
 
     viewConfig: {
-        stripeRows: true,
+        stripeRows: true
         // enableTextSelection: true
     },
 

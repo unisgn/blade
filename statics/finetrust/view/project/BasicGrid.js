@@ -7,6 +7,7 @@ Ext.define('Finetrust.view.project.BasicGrid', {
     requires: [
         'Ext.data.proxy.Ajax',
         'Ext.data.reader.Json',
+        'Ext.grid.column.Date',
         'Finetrust.model.Project',
         'Finetrust.view.EntityGrid'
     ],
@@ -30,20 +31,20 @@ Ext.define('Finetrust.view.project.BasicGrid', {
             }
         },
         columns: [{
-            text: 'Num',
+            text: '编号',
             dataIndex: 'number'
         }, {
-            text: 'Name',
+            text: '名称',
             dataIndex: 'name'
         }, {
-            text: 'Type',
+            text: '类型',
             dataIndex: 'proj_type',
-            renderer: function (val) {
-                return Finetrust.data.Dict.keyset('project_type')[val]['text']
-            }
+            renderer: Finetrust.data.Dict.keyrenderer('project_type')
         },{
             text: '创建日期',
-            dataIndex: 'create_date'
+            dataIndex: 'create_date',
+            xtype: 'datecolumn',
+            format: 'Y-m-d'
         }]
 
     }

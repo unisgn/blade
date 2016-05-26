@@ -1,3 +1,6 @@
+import base64
+import hashlib
+import json
 import threading
 import logging
 import functools
@@ -13,6 +16,8 @@ from decorator import decorator
 
 from http import HTTPStatus
 
+
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 from util import jsonify
@@ -20,6 +25,12 @@ import demjson
 import cgi
 
 from werkzeug.wrappers import BaseRequest
+
+# from geventwebsocket.handler import WebSocketHandler
+from geventwebsocket.handler import WebSocketHandler
+from geventwebsocket import WebSocketServer, WebSocketApplication, Resource
+
+
 
 HTTP_STATUSES = {
     100: ''
@@ -118,7 +129,7 @@ def _get_data(req, cache):
 
 class Request(BaseRequest):
     def __init__(self, environ):
-        super().__init__(environ, populate_request=False)
+        super(Request, self).__init__(environ, populate_request=False)
         self._environ = environ
 
     @property
@@ -438,9 +449,56 @@ def intercept(pattern='/'):
 ctx = threading.local()
 
 
+
+
+class ChatApplication(WebSocketApplication):
+    def on_open(self):
+        print("Some client connected!")
+
+    def on_message(self, message):
+        if message is None:
+            return
+
+        message = json.loads(message)
+
+        if message['msg_type'] == 'message':
+            self.broadcast(message)
+        elif message['msg_type'] == 'update_clients':
+            self.send_client_list(message)
+
+    def send_client_list(self, message):
+        current_client = self.ws.handler.active_client
+        current_client.nickname = message['nickname']
+
+        self.ws.send(json.dumps({
+            'msg_type': 'update_clients',
+            'clients': [
+                getattr(client, 'nickname', 'anonymous')
+                for client in self.ws.handler.server.clients.values()
+            ]
+        }))
+
+    def broadcast(self, message):
+        for client in self.ws.handler.server.clients.values():
+            client.ws.send(json.dumps({
+                'msg_type': 'message',
+                'nickname': message['nickname'],
+                'message': message['message']
+            }))
+
+    def on_close(self, reason):
+        print("Connection closed!")
+
+
+
+
+
+
+
+
 class WSGI:
 
-    def __init__(self, web_root=os.path.dirname(os.path.abspath(__file__)), debug=True):
+    def __init__(self, web_root=os.path.dirname(os.path.abspath(__file__)), debug=False):
         _router.web_root = web_root
         self.router = _router
         self.debug = debug
@@ -498,5 +556,26 @@ class WSGI:
 
     def run(self, host='', port=8000):
         from wsgiref.simple_server import make_server
-        httpd = make_server(host, port, self.get_wsgi())
+
+        # httpd = make_server(host, port, self.get_wsgi())
+
+
+        # from gevent.monkey import patch_all; patch_all()
+        # from psycogreen.gevent import patch_psycopg; patch_psycopg()
+
+        from gevent import pywsgi
+        httpd = pywsgi.WSGIServer((host, port), self.get_wsgi())
+
         httpd.serve_forever()
+
+        # WebSocketServer(
+        #     ('0.0.0.0', 8000),
+        #
+        #     Resource([
+        #         ('^/chat', ChatApplication),
+        #         ('^/.*', self.get_wsgi())
+        #     ]),
+        #
+        #     debug=False
+        # ).serve_forever()
+

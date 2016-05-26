@@ -10,41 +10,49 @@ Ext.define('Finetrust.view.project.EssentialDetail', {
         'Ext.form.Panel',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
+        'Ext.form.field.Display',
         'Finetrust.data.Dict'
     ],
 
+    bind: {
+        title: '市场要素@{data.name}'
+    },
+
     items: {
         xtype: 'form',
+        bodyPadding:5,
         defaultType: 'textfield',
         defaults: {
             readOnly: false
         },
         items: [{
-            fieldLabel: 'Number',
+            fieldLabel: '项目编号',
             name: 'number',
             bind: '{data.number}',
-            readOnly: true
+            xtype: 'displayfield'
         }, {
-            fieldLabel: 'Code',
+            fieldLabel: '项目名称',
             name: 'code',
-            bind: '{data.code}',
+            bind: '{data.name}',
             readOnly: true
         }, {
-            fieldLabel: 'setup_date',
+            fieldLabel: '成立日期',
             name: 'setup_date',
             bind: '{data.setup_date}',
             xtype: 'datefield'
         },{
-            fieldLabel: 'ContractStatus',
+            fieldLabel: '合同编号',
+            name: 'contract_no',
+            bind: '{data.contract_no}',
+            readOnly: true
+        },{
+            fieldLabel: '合同状态',
             name: 'contract_status',
-            bind: '{data.contract_status}',
             xtype: 'combobox',
-            store: {
-                data: Finetrust.data.Dict.keyset('contract_status'),
-                fields: ['key', 'text']
-            },
-            valueField: 'key',
-            displayField: 'text'
+            store: Finetrust.data.Dict.dictstore('contract_status'),
+            valueField: 'value',
+            displayField: 'text',
+            bind: '{data.contract_status}'
         }]
     }
 });

@@ -7,8 +7,7 @@ Ext.define('Finetrust.view.user.Detail', {
 
     requires: [
         'Ext.form.Panel',
-        'Finetrust.controller.UserDetail',
-        'Finetrust.model.User'
+        'Finetrust.controller.UserDetail'
     ],
 
     controller: 'user-detail',

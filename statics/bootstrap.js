@@ -41,9 +41,10 @@ Ext.onReady(function () {
             },
             requestcomplete: function (conn, resp) {
                 var data = resp.responseText;
-                // prefer regular expression test over json decoder
+                // pre test with regular expression, for performance consideration
                 if (reg.test(data)) {
-                    console.warn('private ajax protocol failure detected');
+                    //further test via json decode, here ignored
+                    console.warn('restful protocol failure detected');
                 }
             }
         });

@@ -7,7 +7,7 @@ Ext.define('Finetrust.controller.EntityDetail', {
     alias: 'controller.entity-detail',
 
     get_record: function () {
-        return this.getViewModel().getData().data;
+        return this.getViewModel().get('data');
     },
 
     on_btn_save: function () {
@@ -45,10 +45,8 @@ Ext.define('Finetrust.controller.EntityDetail', {
     issue_new_record: function () {
         var me = this,
             vm = me.getViewModel(),
-            clz = Ext.getClass(vm.getData().data);
-        vm.setData({
-            data: new clz()
-        });
+            clz = Ext.getClass(vm.get('data'));
+        vm.set('data', new clz());
 
     },
 

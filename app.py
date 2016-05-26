@@ -1,4 +1,5 @@
 # coding=utf-8
+
 __author__ = 'yinlan'
 
 
@@ -12,6 +13,8 @@ from models import Base
 Base.metadata.create_all(engine)
 
 wsgi = WSGI()
+
+app = None
 
 if __name__ == '__main__':
     wsgi.run('0.0.0.0')

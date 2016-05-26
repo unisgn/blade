@@ -23,6 +23,10 @@
 
     rootVisible: false,
 
+    viewConfig: {
+        stripeRows: true
+    },
+
 
     /**
      * @type {Beaux.desktop.XWindow}
@@ -80,6 +84,10 @@
                         text: '刷新',
                         handler: 'on_menu_refresh',
                         scope: me.getController()
+                    }, {
+                        text: '同步',
+                        handler: 'on_menu_sync',
+                        scope: me.getController()
                     }]
                 });
                 me.menus.add(menuId, menu);
@@ -105,6 +113,10 @@
                     }, {
                         text: '刷新',
                         handler: 'on_menu_refresh',
+                        scope: me.getController()
+                    }, {
+                        text: '同步',
+                        handler: 'on_menu_sync',
                         scope: me.getController()
                     }]
                 });

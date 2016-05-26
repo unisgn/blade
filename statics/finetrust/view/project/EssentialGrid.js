@@ -7,6 +7,7 @@ Ext.define('Finetrust.view.project.EssentialGrid', {
     requires: [
         'Ext.data.proxy.Ajax',
         'Ext.data.reader.Json',
+        'Ext.grid.column.Date',
         'Finetrust.data.Dict',
         'Finetrust.model.Project',
         'Finetrust.view.EntityGrid'
@@ -31,14 +32,24 @@ Ext.define('Finetrust.view.project.EssentialGrid', {
             }
         },
         columns: [{
-            text: 'Num',
+            text: '编号',
             dataIndex: 'number'
         }, {
-            text: 'Name',
+            text: '名称',
             dataIndex: 'name'
+        }, {
+            text: '类型',
+            dataIndex: 'proj_type',
+            renderer: Finetrust.data.Dict.keyrenderer('project_type')
         },{
-            text: 'Type',
-            dataIndex: 'proj_type'
+            text: '合同状态',
+            dataIndex: 'contract_status',
+            renderer: Finetrust.data.Dict.keyrenderer('contract_status')
+        },{
+            text: '成立日期',
+            dataIndex: 'setup_date',
+            xtype: 'datecolumn',
+            format: 'Y-m-d'
         }]
 
     }

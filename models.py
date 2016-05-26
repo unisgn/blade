@@ -4,7 +4,7 @@
 from sqlalchemy.ext.declarative import declarative_base, AbstractConcreteBase, as_declarative, declared_attr
 
 from sqlalchemy import Column, String, Integer, Boolean, Text, ForeignKey, Numeric, DateTime, Date, PrimaryKeyConstraint, ForeignKeyConstraint
-from sqlalchemy.orm import relationship, composite
+from sqlalchemy.orm import relationship, composite, backref
 from enum import Enum
 
 
@@ -39,6 +39,9 @@ class PrimeBase:
     @declared_attr
     def __tablename__(cls):
         return default_naming_strategy(cls.__name__)
+
+    def __eq__(self, other):
+        return False if not isinstance(other, self.__class__) else self.id == other.id
 
 
 
@@ -105,13 +108,13 @@ class Project(DistinctBase, BusinessEntity):
     }
 
 
-    proj_type = Column(Integer)
+    proj_type = Column(String)
 
     category_id = Column(String, ForeignKey('product_category.id'))
     category = relationship('ProductCategory')
 
     contract_no = Column(String(32))
-    contract_status = Column(Integer)
+    contract_status = Column(String)
 
     proj_mgr = Column(String(32))
     cust_mgr = Column(String(32))
@@ -127,9 +130,13 @@ class Project(DistinctBase, BusinessEntity):
 
 
     agents = relationship('ProjectAgent')
-    pre_accounts = relationship('ProjectPreAccount')
 
-    proj_status = Column(Integer)
+
+    # prime_pre_account_fk = Column(String, ForeignKey('project_pre_account.id'))
+
+    # prime_pre_account = relationship('ProjectPreAccount', cascade='all, delete-orphan')
+
+    proj_status = Column(String)
 
 
 
@@ -142,7 +149,7 @@ class Project(DistinctBase, BusinessEntity):
     online_date = Column(Integer)
     online_scale = Column(Numeric)
     online_memo = Column(Text)
-    online_status = Column(Integer)
+    online_status = Column(String)
 
     acct_num = Column(String)
     asset_code = Column(String)
@@ -165,11 +172,14 @@ class Project(DistinctBase, BusinessEntity):
     trans_person = Column(String(32))
     trans_date = Column(Integer)
     trans_receipt = Column(String(32))
-    trans_status = Column(Integer)
+    trans_status = Column(String)
 
     trans_docs = relationship('ProjectTransDoc')
 
-
+    def __setattr__(self, key, value):
+        if key == 'prime_pre_account':
+            value.is_primary = False
+        object.__setattr__(self, key, value)
 
 #
 # class ProjectBasicInfo:
@@ -285,7 +295,6 @@ class ProjectAccount(DistinctBase, PrimeBase):
         'polymorphic_identity': 'ProjectAccount'
     }
 
-
     acct_no = Column(String(64))
     acct_name = Column(String(64))
     acct_type = Column(Integer)
@@ -313,16 +322,71 @@ class ProductCategory(DistinctBase, PrimeBase):
     leaf = Column(Boolean, default=True)
     parent_id = Column(String, ForeignKey('product_category.id'))
 
-    parent = relationship('ProductCategory', remote_side=[id])
+    # children = relationship('ProductCategory',
+    #                         backref=backref('parent', remote_side=[id]), cascade='all, delete, delete-orphan')
+    parent = relationship('ProductCategory', remote_side=[id], backref=backref('children', cascade='all'), cascade='save-update')
+    # as there is no ultimate root node in this model, you can not use a delete-orphan cascade option
+    # delete-orphan means when no parent found for a record, it will be deleted
 
     def __setattr__(self, key, value):
         if key == 'parent':
-            if value:
-                value.leaf = False
-                self.fullname = value.fullname + ':' + self.name
-            else:
-                self.fullname = self.name
+            old = self.parent
+            new = value
+            if new == old:
+                object.__setattr__(self, key, value)
+                return
+            if new == self or self._parent_of(new):
+                # here we prefer to move the entire hierarchy chain nodes instead of single node
+                # think about that do you want to just delete one single node or the node and all of its children
+                raise Exception('one can not point parent to itself or child node, try to modified the record instead')
+
+            if old is not None:
+                old.children.remove(self)
+                if len(old.children) == 0:
+                    old.leaf = True
+
+            if new is not None:
+                new.leaf = False
+
+            object.__setattr__(self, key, value)
+            self._update_fullname()
+
+            return
+
+        if key == 'name':
+            object.__setattr__(self, key, value)
+            self._update_fullname()
+            return
+
         object.__setattr__(self, key, value)
+
+    def _update_fullname(self):
+        if self.parent:
+            self.fullname = self.parent.fullname + ':' + self.name
+        else:
+            self.fullname = self.name
+        for c in self.children:
+            c._update_fullname()
+
+    def before_remove(self):
+        p = self.parent
+        if len(p.children) == 1:
+            p.leaf = True
+
+    def _parent_of(self, new_parent):
+        if new_parent is None:
+            return False
+        ptr = new_parent
+        while 1:
+            parent = ptr.parent
+            if parent:
+                if parent == self:
+                    return True
+                else:
+                    ptr = parent
+            else:
+                return False
+
 
 
 class Organization(DistinctBase, BaseEntity):
@@ -338,15 +402,44 @@ class Organization(DistinctBase, BaseEntity):
     name = Column(String(64))
     brief = Column(Text)
     leaf = Column(Boolean, default=True)
-
     parent_id = Column(String, ForeignKey('organization.id'))
-    parent = relationship('Organization', remote_side=[id])
+
+    parent = relationship('Organization', remote_side=[id], cascade='save-update', backref=backref('children', cascade='all'))
 
     def __setattr__(self, key, value):
         if key == 'parent':
-            if value:
-                value.leaf = False
+            old = self.parent
+            new = value
+            if new == old:
+                object.__setattr__(self, key, value)
+                return
+            if new == self or self._parent_of(new):
+                raise Exception('one can not point parent to itself or child node, try to modified the record instead')
+
+            if old is not None:
+                children = old.children
+                children.remove(self)
+                if len(children) == 0:
+                    old.leaf = True
+
+            if new is not None:
+                new.leaf = False
+
         object.__setattr__(self, key, value)
+
+    def _parent_of(self, new_parent):
+        if new_parent is None:
+            return False
+        ptr = new_parent
+        while 1:
+            parent = ptr.parent
+            if parent:
+                if parent == self:
+                    return True
+                else:
+                    ptr = parent
+            else:
+                return False
 
 
 class Duty(DistinctBase, BaseEntity):

@@ -40,8 +40,8 @@ Ext.define('Finetrust.view.productCategory.Grider', {
         dataIndex: 'code',
         flex: 1
     }, {
-        text: 'brief',
-        dataIndex: 'brief',
+        text: 'fullname',
+        dataIndex: 'fullname',
         flex: 3
     }]
 });
