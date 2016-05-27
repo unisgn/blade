@@ -152,48 +152,6 @@ Ext.define('Finetrust.controller.EntityGrid', {
         var me = this, vm = me.getViewModel();
         console.log(vm.getData());
     },
-
-    on_afterrender: function (cmp) {
-        var me = cmp, readonly = !!me.readonly;
-
-        if (!readonly) {
-            if (me.keymap) {
-                me.keymap.addBinding({
-                    key: 's',
-                    shift: true,
-                    handler: function () {
-                        me.getController().launch_query_panel();
-                    },
-                    ignoreInputFields: true
-                });
-            } else {
-                me.keymap = Ext.create('Ext.KeyMap', {
-                    target: me.getEl(),
-                    binding: [{
-                        key: 's',
-                        shift: true,
-                        handler: function () {
-                            me.getController().launch_query_panel();
-                        }
-                    }],
-                    ignoreInputFields: true
-                });
-            }
-        }
-    },
-
-    on_destroy: function (cmp) {
-        var me = cmp;
-        me.keymap && me.keymap.destroy();
-
-        me.menus.each(function (key, val, len) {
-            val.destroy();
-        });
-        me.menus.clear();
-
-        Ext.destroy(me.queryPanel);
-
-    },
     
     on_beforeclose: function () {
         if (!Ext.Object.isEmpty(this.get_record())) {

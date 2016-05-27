@@ -17,8 +17,8 @@ Ext.define('Finetrust.app.ProjectOperatorsDetail', {
             },
                 _cfg = cfg || {};
 
-            if (_cfg.id) {
-                links.id = _cfg.model;
+            if (_cfg.model) {
+                links.id = _cfg.model.getId();
             } else {
                 links.create = true;
             }

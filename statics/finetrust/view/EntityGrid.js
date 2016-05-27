@@ -19,13 +19,13 @@
 
     controller: 'entity-grid',
 
+    forceFit: true,
+
     listeners: {
         itemcontextmenu: 'on_itemcontextmenu',
         itemdblclick: 'on_itemdblclick',
         containercontextmenu: 'on_containercontextmenu',
         criteriaready: 'on_criteria_ready',
-        afterrender: 'on_afterrender',
-        destroy: 'on_destroy',
         scope: 'controller' // IMPORTANT
     },
 
@@ -97,10 +97,7 @@
     },
 
     getSingleSelection: function () {
-        var me = this, sel = me.getSelection();
-        if (sel.length > 0) {
-            return sel[0];
-        }
+        return this.getSelection()[0];
     },
 
 
@@ -176,6 +173,53 @@
             }
             return menu;
         }
+    },
+
+
+
+    afterRender: function () {
+        var me = this, readonly = !!me.readonly;
+
+        if (!readonly) {
+            if (me.keymap) {
+                me.keymap.addBinding({
+                    key: 's',
+                    shift: true,
+                    handler: function () {
+                        me.getController().launch_query_panel();
+                    },
+                    ignoreInputFields: true
+                });
+            } else {
+                me.keymap = Ext.create('Ext.KeyMap', {
+                    target: me.getEl(),
+                    binding: [{
+                        key: 's',
+                        shift: true,
+                        handler: function () {
+                            me.getController().launch_query_panel();
+                        }
+                    }],
+                    ignoreInputFields: true
+                });
+            }
+        }
+        
+        me.callParent(arguments);
+    },
+
+    onDestroy: function () {
+        var me = this;
+        me.keymap && me.keymap.destroy();
+
+        me.menus.each((key, val) => {
+            val.destroy();
+        });
+        me.menus.clear();
+
+        Ext.destroy(me.queryPanel);
+
+        me.callParent(arguments);
     }
 
 });

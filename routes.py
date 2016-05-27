@@ -388,48 +388,40 @@ def update_duty(id):
             return po.__json__()
 
 
-@route('/api/DutyGroup')
+@route('/api/DutyChain')
 @restful
-def get_duty_group_list():
+def get_duty_chain_list():
     with open_session() as s:
-        rs = s.query(DutyGroup).all()
+        rs = s.query(DutyChain).all()
         return [e.__json__() for e in rs]
 
 
-@route('/api/DutyGroup/<id>')
+@route('/api/DutyChain/<id>')
 @restful
-def get_duty_group(id):
+def get_duty_chain(id):
     with open_session() as s:
-        po = s.query(DutyGroup).filter(DutyGroup.id == id).one_or_none()
+        po = s.query(DutyChain).filter(DutyChain.id == id).one_or_none()
         if po:
             return po.__json__()
 
 
-@route('/api/DutyGroup', method='post')
+@route('/api/DutyChain', method='post')
 @restful
-def add_duty_group():
+def add_duty_chain():
     with open_session() as s:
         vo = ctx.request.json
-        po = DutyGroup()
+        po = DutyChain()
         po.update_vo(vo)
-
-        members = vo['member_csv'].split(',')
-        for id in members:
-            duty = s.query(Duty).filter(Duty.id == id).one_or_none()
-            if duty:
-                item = DutyGroupItem()
-                item.duty = duty
-                po.members.append(item)
         s.add(po)
         s.commit()
         return po.__json__()
 
 
-@route('/api/DutyGroup/<id>', method='put')
+@route('/api/DutyChain/<id>', method='put')
 @restful
-def update_duty_group(id):
+def update_duty_chain(id):
     with open_session() as s:
-        po = s.query(DutyGroup).filter(DutyGroup.id == id).one_or_none()
+        po = s.query(DutyChain).filter(DutyChain.id == id).one_or_none()
         if po:
             vo = ctx.request.json
             po.update_vo(vo)
@@ -517,6 +509,18 @@ def update_project_pre_account(id):
             s.add(po)
             s.commit()
             return po.__json__()
+
+
+@route('/api/ProjectPreAccount/<id>/set_primary', method='put')
+@restful
+def set_main_project_pre_account(id):
+    project_id = ctx.request.form['project_id']
+    with open_session() as s:
+        tbl = ProjectPreAccount.__table__
+        stmt = tbl.update().where(tbl.c.project_id == project_id).values(is_primary=False)
+        s.execute(stmt)
+        stmt = tbl.update().where(tbl.c.id == id).values(is_primary=True)
+        s.execute(stmt)
 
 
 @route('/api/ProjectPreAccount/<id>', method='delete')
@@ -776,6 +780,8 @@ def pull_app_dict():
         update_dict('root_product_category', rs)
         rs = s.query(Organization.id, Organization.name).all()
         update_dict('organization', rs)
+        rs = s.query(User.username, User.name).all()
+        update_dict('user', rs)
     return rv
 #
 # # @intercept('/')

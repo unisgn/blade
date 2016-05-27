@@ -16,7 +16,7 @@
             } else {
                 me.xwindow = Ext.create('Finetrust.view.dutyChain.Grider');
                 me.xwindow.on({
-                    destroy: function () {
+                    destroy: () => {
                         me.xwindow = undefined;
                     }
                 });

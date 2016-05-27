@@ -8,7 +8,6 @@
         {name:'code', type:'string'},
         {name:'name', type:'string'},
         {name:'brief', type: 'string' },
-        {name:'member_csv', type: 'string'},
-        {name:'member_text_csv', type: 'string', persist: false}
+        {name:'members', type: 'string'}
     ]
 });

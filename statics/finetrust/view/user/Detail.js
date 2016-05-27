@@ -6,19 +6,19 @@ Ext.define('Finetrust.view.user.Detail', {
     extend: 'Finetrust.view.EntityDetail',
 
     requires: [
-        'Ext.form.Panel',
-        'Finetrust.controller.UserDetail'
+        'Ext.form.Panel'
     ],
 
-    controller: 'user-detail',
+    controller: 'entity-detail',
     
     bind: {
-        title: '{data.username}'
+        title: '用户@{data.username}'
     },
     
 
     items: {
         xtype: 'form',
+        bodyPadding: 5,
         defaultType: 'textfield',
         items: [{
             fieldLabel: 'username',

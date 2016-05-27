@@ -22,6 +22,8 @@
     },
 
     rootVisible: false,
+    
+    forceFit: true,
 
     viewConfig: {
         stripeRows: true
@@ -48,10 +50,7 @@
     
 
     getSingleSelection: function() {
-        var me = this, sel = me.getSelection();
-        if (sel.length > 0) {
-            return sel[0];
-        }
+        return this.getSelection()[0];
     },
 
     getItemContextMenu: function () {
@@ -134,7 +133,7 @@
      */
     onDestroy: function () {
         var me = this;
-        me.menus.each(function (key, val, len) {
+        me.menus.each((key, val) => {
             val.destroy();
         });
         

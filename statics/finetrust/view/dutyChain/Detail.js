@@ -8,23 +8,19 @@ Ext.define('Finetrust.view.dutyChain.Detail', {
     requires: [
         'Ext.form.Panel',
         'Ext.form.field.Tag',
-        'Ext.form.field.TextArea',
-        'Finetrust.model.Duty'
+        'Ext.form.field.TextArea'
     ],
 
     controller: 'entity-detail',
 
     bind: {
-        title: '审批链 - {data.name}'
+        title: '审批链@{data.name}'
     },
 
 
     items: {
         xtype: 'form',
         defaultType: 'textfield',
-        defaults: {
-            readOnly: false
-        },
         items: [{
             fieldLabel: 'code',
             name: 'code',
@@ -40,19 +36,12 @@ Ext.define('Finetrust.view.dutyChain.Detail', {
             xtype: 'textarea'
         }, {
             fieldLabel: 'Members',
-            name: 'member_csv',
+            name: 'members',
             xtype: 'tagfield',
-            store: {
-                model: 'Finetrust.model.Duty',
-                autoLoad: true
-            },
-            valueField: 'id',
-            displayField: 'name',
-            // bind: '{data.member_csv}'
-        },{
-            fieldLabel: 'member_csv',
-            name: 'member_csv_2',
-            bind: '{data.member_csv}'
+            store: Finetrust.data.Dict.dictstore('duty'),
+            valueField: 'value',
+            displayField: 'text',
+            bind: '{data.members}'
         }]
     }
 

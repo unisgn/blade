@@ -36,7 +36,8 @@ Ext.define('Finetrust.view.project.OnlineGrid', {
             dataIndex: 'name'
         },{
             text: 'Type',
-            dataIndex: 'proj_type'
+            dataIndex: 'proj_type',
+            renderer: Finetrust.data.Dict.keyrenderer('project_type')
         }]
 
     }

@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 
 
-engine = create_engine('postgresql://postgres:postgres@localhost/finetrust', echo=False)
+engine = create_engine('postgresql://postgres:postgres@localhost/finetrust', echo=True)
 # engine = create_engine('sqlite://')
 
 Session = sessionmaker(bind=engine)

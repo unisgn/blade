@@ -28,23 +28,27 @@ Ext.onReady(function () {
 
     // disable browser oncontextmenu event
     Ext.getBody().on({
-        contextmenu: function (e) {
+        contextmenu: e => {
             e.stopEvent();
         }
     });
 
-    (function (Ext) {
-        var reg = /"success":false/;
+    ((Ext) => {
+        var _false_reg = /"success":false/;
+        var _true_reg = /"success":true/;
         Ext.Ajax.on({
-            requestexception: function (conn, resp) {
+            requestexception: (conn, resp) => {
                 console.log(resp);
             },
-            requestcomplete: function (conn, resp) {
-                var data = resp.responseText;
+            requestcomplete: (conn, resp) => {
+                let data = resp.responseText;
                 // pre test with regular expression, for performance consideration
-                if (reg.test(data)) {
-                    //further test via json decode, here ignored
-                    console.warn('restful protocol failure detected');
+                if (_false_reg.test(data)) {
+                    if (!_true_reg.test(data)) {
+                        //further test via json decode, here ignored
+                        console.warn('restful protocol failure detected');
+                    }
+
                 }
             }
         });

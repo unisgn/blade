@@ -15,26 +15,27 @@ Ext.define('Finetrust.view.duty.Detail', {
     controller: 'entity-detail',
     
     bind: {
-        title: '{data.name}'
+        title: '岗位@{data.name}'
     },
     
 
     items: {
         xtype: 'form',
+        bodyPadding: 5,
         defaultType: 'textfield',
         defaults: {
             readOnly: false
         },
         items: [{
-            fieldLabel: 'code',
+            fieldLabel: '编号',
             name: 'code',
             bind: '{data.code}'
         }, {
-            fieldLabel: 'name',
+            fieldLabel: '名称',
             name: 'name',
             bind: '{data.name}'
         }, {
-            fieldLabel: 'brief',
+            fieldLabel: '说明',
             name: 'brief',
             bind: '{data.brief}',
             xtype: 'textarea'

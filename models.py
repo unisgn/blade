@@ -154,6 +154,10 @@ class Project(DistinctBase, BusinessEntity):
     acct_num = Column(String)
     asset_code = Column(String)
 
+    clerks_operator = Column(String)
+    clerks_checker = Column(String)
+    clerks_director = Column(String)
+
     trustee_corp = Column(String(64))
     trustee_contact = Column(String(64))
 
@@ -456,44 +460,21 @@ class Duty(DistinctBase, BaseEntity):
     brief = Column(Text)
 
 
-class DutyGroup(DistinctBase, BaseEntity):
+class DutyChain(DistinctBase, BaseEntity):
     id = Column(String, primary_key=True)
     version = Column(Integer, nullable=False)
     __mapper_args__ = {
         'version_id_col': version,
         'concrete': True,
-        'polymorphic_identity': 'DutyGroup'
+        'polymorphic_identity': 'DutyChain'
     }
 
     code = Column(String(20))
     name = Column(String(64))
     brief = Column(Text)
 
-    members = relationship('DutyGroupItem')
+    members = Column(Text)
 
-    def __json__(self):
-        ret = super(DutyGroup, self).__json__()
-        ret['members'] = [e.__json__() for e in self.members]
-        return ret
-
-
-class DutyGroupItem(DistinctBase, PrimeBase):
-
-    group_id = Column(String, ForeignKey('duty_group.id'), primary_key=True)
-    duty_id = Column(String, ForeignKey('duty.id'), primary_key=True)
-
-    sub_idx = Column(Integer)
-    duty = relationship('Duty')
-
-    __mapper_args__ = {
-        'concrete': True,
-        'polymorphic_identity': 'DutyGroupItem'
-    }
-
-    def __json__(self):
-        ret = super(DutyGroupItem, self).__json__()
-        ret['duty'] = self.duty.__json__()
-        return ret
 
 
 class Attachment(DistinctBase, PrimeBase):

@@ -11,6 +11,7 @@ Ext.define('Finetrust.view.duty.Grider', {
         'Finetrust.view.EntityGrid'
     ],
 
+    title: '岗位',
 
     items: {
         xtype: 'entity-grid',
@@ -20,14 +21,17 @@ Ext.define('Finetrust.view.duty.Grider', {
             autoLoad: true
         },
         columns: [{
-            text: 'Code',
-            dataIndex: 'code'
+            text: '编号',
+            dataIndex: 'code',
+            flex: 1
         }, {
-            text: 'Name',
-            dataIndex: 'name'
+            text: '名称',
+            dataIndex: 'name',
+            flex: 1
         },{
-            text: 'brief',
-            dataIndex: 'brief'
+            text: '说明',
+            dataIndex: 'brief',
+            flex: 1
         }]
     }
 

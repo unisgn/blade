@@ -24,16 +24,28 @@ Ext.define('Finetrust.view.dutyChain.Grider', {
         },
         columns: [{
             text: 'Code',
-            dataIndex: 'code'
+            dataIndex: 'code',
+            flex: 1
         }, {
             text: 'Name',
-            dataIndex: 'name'
+            dataIndex: 'name',
+            flex: 1
+        }, {
+            text: 'members',
+            dataIndex: 'members',
+            renderer: v => {
+                if (v) {
+                    let ds = Finetrust.data.Dict.keymap('duty');
+
+                    return v.split(',').map(x => ds[x].text).join(',');
+                }
+                return v;
+            },
+            flex: 2
         }, {
             text: 'brief',
-            dataIndex: 'brief'
-        },{
-            text: 'members',
-            dataIndex: 'member_text_csv'
+            dataIndex: 'brief',
+            flex: 1
         }]
     }
 

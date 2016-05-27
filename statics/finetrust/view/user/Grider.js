@@ -1,5 +1,5 @@
 /**
- * Created by 0xFranCiS on May 09, 2016.
+ * Created by 0xFranCiS on May 28, 2016.
  */
 
 Ext.define('Finetrust.view.user.Grider', {
@@ -7,14 +7,12 @@ Ext.define('Finetrust.view.user.Grider', {
 
 
     requires: [
-        'Ext.app.ViewModel',
         'Ext.button.Button',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Text',
         'Ext.grid.column.Date',
         'Finetrust.model.User',
         'Finetrust.view.EntityGrid',
-        'Finetrust.view.user.Detail',
         'Finetrust.view.user.QueryPanel'
     ],
 
@@ -40,7 +38,7 @@ Ext.define('Finetrust.view.user.Grider', {
             text: '重置',
             handler: 'reset_inline_criteria',
             width: 50
-        },{
+        }, {
             xtype: 'textfield',
             name: 'search-area',
             // triggers: {

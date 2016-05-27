@@ -55,63 +55,60 @@
      * @param key
      * @returns {*}
      */
-    d.keyset = function (key) {
-        return DICT_SET[key] ? DICT_SET[key].values : undefined;
-    };
+    d.keyset = key => key in DICT_SET ? DICT_SET[key].values : undefined;
 
     /**
      * usually used by grid column renderer
      * @param key
      * @returns {*}
      */
-    d.keymap = function (key) {
-        return DICT_MAP[key] ? DICT_MAP[key].values : undefined;
-    };
+    d.keymap = key => key in DICT_MAP ? DICT_MAP[key].values : undefined;
 
-    d.get_text = function (k, v) {
-        var dd = DICT_MAP[k];
-        return dd && dd.values[v] ? dd.values[v]['text'] : '';
-    };
-
-    d.get_text_or = function (k, v, or) {
-        var dd = DICT_MAP[k];
-        return dd && dd.values[v] ? dd.values[v]['text'] : or;
-    };
+    d.get_text = (k, v, or = '') => k in DICT_MAP && v in DICT_MAP[k]['values'] ? DICT_MAP[k]['values'][v]['text'] : or;
 
     /**
      * a handy column renderer generator, usually used by grid column renderer
      * @param {String} k the dict key/group name
      * @returns {Function} an renderer function
      */
-    d.keyrenderer = function (k) {
-        return function (v) {
-            return d.get_text(k, v);
-        }
-    };
+    d.keyrenderer = k => v => d.get_text(k, v);
+
+
+    /**
+     * 
+     * @param key
+     * @param delimiter
+     * @returns {Function} an renderer function
+     */
+    d.spliterkeyrenderer = (key, delimiter = ',') =>
+        key in DICT_MAP ?
+            v => v ? v.split(delimiter).map(e => DICT_MAP[key]['values'][e]['text']).join(',') : v
+            : v => v;
 
     var stores = [];
 
     var uuid = new Ext.data.identifier.Uuid();
 
 
-    d.dictstore = function (dictname) {
-        var id = uuid.generate();
-        stores.push({
-            dict: dictname,
-            id: id,
-            type: 0
-        });
-        return Ext.create('Ext.data.Store', {
-            fields: ['value', 'text'],
-            data: d.keyset(dictname) || [],
-            storeId: id
-        });
+    d.dictstore = dictname => {
+        if (dictname in DICT_SET) {
+            var id = uuid.generate();
+            stores.push({
+                dict: dictname,
+                id: id,
+                type: 0
+            });
+            return Ext.create('Ext.data.Store', {
+                fields: ['value', 'text'],
+                data: d.keyset(dictname) || [],
+                storeId: id
+            });
+        }
     };
 
 
-
-    d.nullabledictstore = function (dictname, nulltext, nullvalue) {
-        var item = [{value: nullvalue || '', text: nulltext}];
+    d.nullabledictstore = (dictname, nulltext, nullvalue = '') => {
+        var item = [{value: nullvalue, text: nulltext}];
         var data = item.concat(d.keyset(dictname) || []);
         var id = uuid.generate();
         stores.push({
@@ -130,14 +127,14 @@
     // TODO: pull database dicts, usually user definedable
 
 
-    d.init_remote_dict = function (callback) {
+    d.init_remote_dict = callback => {
         new Promise(function (resolve, reject) {
             Ext.Ajax.request({
                 url: '../api/data/pull_app_dict',
-                success: function (resp, opts) {
+                success: resp => {
                     resolve(resp);
                 },
-                failure: function (resp, opts) {
+                failure: resp => {
                     reject(resp);
                 }
             });
@@ -159,7 +156,7 @@
     function update_storemanager_cache() {
         var s;
 
-        Ext.Array.each(stores, function (v) {
+        Ext.Array.each(stores, v => {
             s = Ext.data.StoreManager.getByKey(v.id);
             if (s) {
                 if (v.type === 0) {
@@ -171,8 +168,8 @@
         });
     }
 
-    d.pull_remote_dict = function () {
+    d.pull_remote_dict = () => {
         d.init_remote_dict(update_storemanager_cache);
-    }
+    };
 
 })(Ext);

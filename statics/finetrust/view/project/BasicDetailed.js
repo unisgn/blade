@@ -142,9 +142,20 @@ Ext.define('Finetrust.view.project.BasicDetailed', {
                     var store = this.up('grid').getStore();
                     var cur = store.getAt(rowIdx);
                     var cur_id = cur.getId();
-                    store.each(function (record) {
-                        if (record.getId() != cur_id) {
-                            record.set('is_primary', false);
+                    var vm = this.up('window').getViewModel();
+                    var project_id = vm.get('data.id');
+                    Ext.Ajax.request({
+                        url: '/api/ProjectPreAccount/' + cur_id + '/set_primary',
+                        params: {
+                            project_id: project_id
+                        },
+                        method: 'PUT',
+                        success: () => {
+                            store.each(function (record) {
+                                if (record.getId() != cur_id) {
+                                    record.set('is_primary', false);
+                                }
+                            });
                         }
                     });
                 }

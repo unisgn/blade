@@ -9,7 +9,10 @@ Ext.define('Finetrust.view.project.OperatorsGrid', {
         'Finetrust.model.Project'
     ],
 
-    title: '权限分配',
+    title: '运营权限分配',
+
+    width: 800,
+
 
 
     items: {
@@ -20,7 +23,7 @@ Ext.define('Finetrust.view.project.OperatorsGrid', {
             autoLoad: true,
             proxy: {
                 url: '../api/data/project/operators',
-                type:'ajax',
+                type: 'ajax',
                 reader: {
                     rootProperty: 'data',
                     type: 'json'
@@ -34,11 +37,23 @@ Ext.define('Finetrust.view.project.OperatorsGrid', {
             text: 'Name',
             dataIndex: 'name'
         }, {
-            text: '帐套',
+            text: '帐套号',
             dataIndex: 'acct_num'
-        },{
+        }, {
             text: '资产代码',
             dataIndex: 'asset_code'
+        }, {
+            text: '经办',
+            dataIndex: 'clerks_operator',
+            renderer: Finetrust.data.Dict.spliterkeyrenderer('user')
+        }, {
+            text: '复核',
+            dataIndex: 'clerks_checker',
+            renderer: Finetrust.data.Dict.spliterkeyrenderer('user')
+        }, {
+            text: '主管',
+            dataIndex: 'clerks_director',
+            renderer: Finetrust.data.Dict.spliterkeyrenderer('user')
         }]
 
     }

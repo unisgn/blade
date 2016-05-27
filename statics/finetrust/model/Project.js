@@ -40,6 +40,9 @@
         {name: 'trans_person', type:'string'},
         {name: 'trans_date', type:'int'},
         {name: 'trans_receipt', type:'string'},
-        {name: 'prime_pre_account_fk', type:'string'}
+        {name: 'prime_pre_account_fk', type:'string'},
+        {name: 'clerks_operator', type:'string'},
+        {name: 'clerks_checker', type:'string'},
+        {name: 'clerks_director', type:'string'}
     ]
 });
