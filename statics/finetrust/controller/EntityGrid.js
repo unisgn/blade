@@ -32,7 +32,7 @@ Ext.define('Finetrust.controller.EntityGrid', {
 
     on_itemdblclick: function (dom, record, item, idx, e) {
         e.stopEvent();
-        this.launch_detail(record, true);
+        this.launch_detail(record.getId(), 'readonly');
         return false;
     },
 
@@ -49,7 +49,7 @@ Ext.define('Finetrust.controller.EntityGrid', {
     on_menu_view: function () {
         var me = this, view = me.getView(), record = view.getSingleSelection();
         if (record) {
-            me.launch_detail(record, true);
+            me.launch_detail(record.getId(), 'readonly');
         }
     },
 
@@ -57,7 +57,7 @@ Ext.define('Finetrust.controller.EntityGrid', {
     on_menu_edit: function () {
         var me = this, view = me.getView(), record = view.getSingleSelection();
         if (record) {
-            me.launch_detail(record, false);
+            me.launch_detail(record.getId(), 'update');
         }
     },
 
@@ -81,18 +81,18 @@ Ext.define('Finetrust.controller.EntityGrid', {
     },
     /**
      *
-     * @param {String|Number|Ext.data.Model} [model] - the model of the record
-     * @param {Boolean} [readonly] - readonly mode
+     * @param {String|Number|Ext.data.Model} [id] - the model of the record
+     * @param {Boolean} [mode] - readonly mode
      */
-    launch_detail: function (model, readonly) {
-        var me = this, view = me.getView(), detailApp = view.getDetailApp();
-        if (detailApp) {
-            Beaux.launch(detailApp, {
-                model: model,
-                readonly: !!readonly
+    launch_detail: function (id, mode) {
+        var me = this, view = me.getView(), app = view.getApp();
+        if (app) {
+            Beaux.launch(app, {
+                id: id,
+                mode: mode
             });
         } else {
-            Ext.warn('no detailApp found in view');
+            console.warn('no detailApp found in view');
         }
     },
 

@@ -15,7 +15,7 @@ Ext.define('Finetrust.view.duty.Grider', {
 
     items: {
         xtype: 'entity-grid',
-        detailApp: 'Finetrust.app.DutyDetail',
+        app: 'Finetrust.app.Duty',
         store: {
             model: 'Finetrust.model.Duty',
             autoLoad: true

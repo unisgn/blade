@@ -9,6 +9,10 @@ Ext.define('Finetrust.view.productCategory.Detail', {
         'Ext.form.Panel',
         'Ext.form.field.ComboBox'
     ],
+    
+    bind: {
+        title: '产品目录@{data.name}'
+    },
 
     controller: 'entity-detail',
 
@@ -53,7 +57,7 @@ Ext.define('Finetrust.view.productCategory.Detail', {
     initReadonly: function () {
         var me = this;
         me.items.defaults = {
-            readOnly: me.getReadonly()
+            readOnly: me.getMode() === 'readonly'
         };
 
         me.callParent(arguments);

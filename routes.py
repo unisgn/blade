@@ -78,7 +78,7 @@ def add_user():
 @restful
 def get_user(id):
     with open_session() as session:
-        po = session.query(User).filter(User.id == id).one_or_none()
+        po = session.query(User).filter(User.username == id).one_or_none()
         if po:
             return po.__json__()
 
@@ -103,7 +103,7 @@ def update_user(id):
 @restful
 def remove_user(id):
     with open_session() as session:
-        session.query(User).filter(User.id == id).delete(synchronize_session=False)
+        session.query(User).filter(User.username == id).delete(synchronize_session=False)
 
 
 @route('/api/ProductCategory')

@@ -1,47 +1,19 @@
 /**
- * Created by 0xFranCiS on May 13, 2016.
+ * Created by 0xFranCiS on May 28, 2016.
  */
-
 Ext.define('Finetrust.view.productCategory.Grider', {
-    extend: 'Finetrust.view.EntityTreeGrid',
+    extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Ext.data.proxy.Ajax',
-        'Ext.data.reader.Json',
-        'Finetrust.model.ProductCategory',
-        'Finetrust.view.EntityTreeGrid'
+        'Finetrust.view.productCategory.Grid'
     ],
+    
+    
+    title: '产品目录树',
+    
 
-
-    detailApp: 'Finetrust.app.ProductCategoryDetail',
-
-    store: {
-        model: 'Finetrust.model.ProductCategory',
-        autoLoad: true,
-
-        parentIdProperty: 'parent_id',
-        proxy: {
-            type: 'ajax',
-            url: '../api/tree/ProductCategory',
-            reader: {
-                type: 'json',
-                rootProperty: 'data'
-            }
-        }
-    },
-
-    columns: [{
-        xtype: 'treecolumn',
-        text: 'Name',
-        dataIndex: 'name',
-        flex: 2
-    }, {
-        text: 'code',
-        dataIndex: 'code',
-        flex: 1
-    }, {
-        text: 'fullname',
-        dataIndex: 'fullname',
-        flex: 3
-    }]
+    items: {
+        xtype: 'productcategory-grid',
+        app: 'Finetrust.app.ProductCategory'
+    }
 });

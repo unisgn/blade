@@ -19,8 +19,8 @@ Ext.define('Finetrust.view.EntityDetail', {
     controller: 'entity-detail',
 
     config: {
-        readonly: false,
-        updatemode: false
+        mode: 'readonly',
+        app: undefined
     },
     
     listeners: {
@@ -51,7 +51,7 @@ Ext.define('Finetrust.view.EntityDetail', {
     
     initReadonly: function () {
         var me = this;
-        if (me.getReadonly()) {
+        if (me.getMode() === 'readonly') {
             me.fbar = undefined;
         }
     },

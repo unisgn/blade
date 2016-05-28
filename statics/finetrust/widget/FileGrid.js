@@ -28,7 +28,7 @@ Ext.define('Finetrust.widget.FileGrid', {
     },
 
 
-    items: [{
+    items: {
         xtype: 'grid',
         reference: 'grid',
         minHeight: 120,
@@ -78,13 +78,14 @@ Ext.define('Finetrust.widget.FileGrid', {
                 }]
             }]
         }
-    }],
+    },
 
     initComponent: function () {
         var me = this;
 
         if (me.readonly) {
-            me.tbar = undefined;
+            me.items.tbar = undefined;
+            me.items.columns.items[2].hidden = true;
         }
 
         me.callParent();

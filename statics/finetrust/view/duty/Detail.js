@@ -7,9 +7,7 @@ Ext.define('Finetrust.view.duty.Detail', {
 
     requires: [
         'Ext.form.Panel',
-        'Ext.form.field.ComboBox',
-        'Ext.form.field.TextArea',
-        'Finetrust.model.Duty'
+        'Ext.form.field.TextArea'
     ],
 
     controller: 'entity-detail',
@@ -23,9 +21,6 @@ Ext.define('Finetrust.view.duty.Detail', {
         xtype: 'form',
         bodyPadding: 5,
         defaultType: 'textfield',
-        defaults: {
-            readOnly: false
-        },
         items: [{
             fieldLabel: '编号',
             name: 'code',
@@ -41,6 +36,15 @@ Ext.define('Finetrust.view.duty.Detail', {
             xtype: 'textarea'
         
         }]
+    },
+    
+    initReadonly: function () {
+        var me = this;
+        me.items.defaults = {
+            readOnly: me.getMode() === 'readonly'
+        };
+        
+        me.callParent(arguments);
     }
     
 });

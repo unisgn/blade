@@ -43,9 +43,9 @@
          */
         menus: Ext.create('Ext.util.HashMap'),
         
-        detailApp: undefined,
+        app: undefined,
         
-        readonly: false
+        mode: 'edit'
     },
     
 

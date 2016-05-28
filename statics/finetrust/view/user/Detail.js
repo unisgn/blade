@@ -1,7 +1,6 @@
 /**
  * Created by 0xFranCiS on May 09, 2016.
  */
-
 Ext.define('Finetrust.view.user.Detail', {
     extend: 'Finetrust.view.EntityDetail',
 
@@ -38,7 +37,7 @@ Ext.define('Finetrust.view.user.Detail', {
     initReadonly: function () {
         var me = this;
         me.items.defaults = {
-            readOnly: me.getReadonly()
+            readOnly: me.getMode() === 'readonly'
         };
         
         me.callParent(arguments);

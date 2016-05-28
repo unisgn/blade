@@ -7,7 +7,7 @@ Ext.define('Finetrust.model.PrimeEntity', {
     requires: [
         'Ext.data.identifier.Uuid',
         'Ext.data.proxy.Rest',
-        'Ext.data.reader.Json'
+        'Finetrust.data.MyJsonReader'
     ],
 
     fields: [
@@ -24,9 +24,7 @@ Ext.define('Finetrust.model.PrimeEntity', {
             url:'../api/{entityName}',
             // format: 'json',
             reader:{
-                type:'json',
-                rootProperty: 'data',
-                messageProperty: 'msg'
+                type:'my-json'
             }
         }
     }

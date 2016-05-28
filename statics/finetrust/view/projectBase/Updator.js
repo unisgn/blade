@@ -2,7 +2,7 @@
  * Created by 0xFranCiS on May 14, 2016.
  */
 
-Ext.define('Finetrust.view.project.BasicDetailed', {
+Ext.define('Finetrust.view.projectBase.Updator', {
     extend: 'Finetrust.view.EntityDetail',
 
     requires: [
@@ -12,7 +12,7 @@ Ext.define('Finetrust.view.project.BasicDetailed', {
         'Ext.form.Panel',
         'Ext.form.field.Date',
         'Ext.grid.Panel',
-        'Ext.grid.column.Boolean',
+        'Ext.layout.container.Anchor',
         'Finetrust.model.ProjectAgent',
         'Finetrust.view.project.ProjectAgent',
         'Finetrust.widget.FileGrid'
@@ -233,5 +233,20 @@ Ext.define('Finetrust.view.project.BasicDetailed', {
         bind: {
             fkid: '{data.id}'
         }
-    }]
+    }],
+
+
+    initReadonly: function () {
+        var me = this;
+        if (me.getMode() === 'readonly') {
+            me.items[0].defaults = {
+                readOnly: true
+            };
+            me.items[1].readonly = true;
+            me.items[2].readonly = true;
+            me.items[3].readonly = true;
+        }
+
+        me.callParent();
+    }
 });

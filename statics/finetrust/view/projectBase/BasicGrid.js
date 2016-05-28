@@ -1,13 +1,12 @@
 /**
  * Created by 0xFranCiS on May 14, 2016.
  */
-Ext.define('Finetrust.view.project.BasicGrid', {
+Ext.define('Finetrust.view.projectBase.BasicGrid', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Ext.data.proxy.Ajax',
-        'Ext.data.reader.Json',
         'Ext.grid.column.Date',
+        'Finetrust.data.MyAjaxProxy',
         'Finetrust.model.Project',
         'Finetrust.view.EntityGrid'
     ],
@@ -17,17 +16,13 @@ Ext.define('Finetrust.view.project.BasicGrid', {
 
     items: {
         xtype: 'entity-grid',
-        detailApp: 'Finetrust.app.ProjectBasicDetail',
+        app: 'Finetrust.app.ProjectBase',
         store: {
             model: 'Finetrust.model.Project',
             autoLoad: true,
             proxy: {
                 url: '../api/data/project/basic',
-                type:'ajax',
-                reader: {
-                    rootProperty: 'data',
-                    type: 'json'
-                }
+                type:'my-ajax'
             }
         },
         columns: [{
