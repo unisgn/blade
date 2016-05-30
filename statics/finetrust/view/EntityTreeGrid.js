@@ -4,6 +4,7 @@
 ;Ext.define('Finetrust.view.EntityTreeGrid', {
     extend: 'Ext.tree.Panel',
 
+    xtype: 'entity-treegrid',
 
     requires: [
         'Ext.menu.Menu',
@@ -43,9 +44,7 @@
          */
         menus: Ext.create('Ext.util.HashMap'),
         
-        app: undefined,
-        
-        mode: 'edit'
+        app: undefined
     },
     
 

@@ -26,7 +26,7 @@ Ext.define('Finetrust.view.user.Grid', {
 
     },
 
-    detailApp: 'Finetrust.app.UserDetail',
+    app: 'Finetrust.app.User',
 
     tbar: {
         defaults: {

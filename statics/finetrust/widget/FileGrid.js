@@ -11,7 +11,7 @@ Ext.define('Finetrust.widget.FileGrid', {
     layout: 'auto',
 
 
-    controller: 'file-grid',
+    controller: 'file_grid',
 
     requires: [
         'Ext.form.Panel',
@@ -19,7 +19,7 @@ Ext.define('Finetrust.widget.FileGrid', {
         'Ext.grid.Panel',
         'Ext.grid.column.Action',
         'Ext.grid.column.Date',
-        'Finetrust.controller.FileGridController'
+        'Finetrust.controller.FileGrid'
     ],
 
     config: {

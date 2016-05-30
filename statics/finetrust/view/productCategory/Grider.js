@@ -5,15 +5,44 @@ Ext.define('Finetrust.view.productCategory.Grider', {
     extend: 'Beaux.desktop.XWindow',
 
     requires: [
-        'Finetrust.view.productCategory.Grid'
+        'Ext.tree.Column',
+        'Finetrust.data.MyAjaxProxy',
+        'Finetrust.model.ProductCategory',
+        'Finetrust.view.EntityGrid'
     ],
-    
-    
+
+
     title: '产品目录树',
-    
+
 
     items: {
-        xtype: 'productcategory-grid',
-        app: 'Finetrust.app.ProductCategory'
+        xtype: 'entity-grid',
+        app: 'Finetrust.app.ProductCategory',
+
+        store: {
+            model: 'Finetrust.model.ProductCategory',
+            autoLoad: true,
+
+            parentIdProperty: 'parent_id',
+            proxy: {
+                type: 'my-ajax',
+                url: '../api/tree/ProductCategory'
+            }
+        },
+
+        columns: [{
+            xtype: 'treecolumn',
+            text: 'Name',
+            dataIndex: 'name',
+            flex: 2
+        }, {
+            text: 'code',
+            dataIndex: 'code',
+            flex: 1
+        }, {
+            text: 'fullname',
+            dataIndex: 'fullname',
+            flex: 3
+        }]
     }
 });

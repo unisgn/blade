@@ -27,7 +27,7 @@ Ext.define('Finetrust.view.organization.Detail', {
             valueField: 'value',
             displayField: 'text',
             bind: '{data.parent_id}'
-        },{
+        }, {
             fieldLabel: '机构名',
             name: 'name',
             bind: '{data.name}'
@@ -35,7 +35,7 @@ Ext.define('Finetrust.view.organization.Detail', {
             fieldLabel: '机构代码',
             name: 'code',
             bind: '{data.code}'
-        },{
+        }, {
             fieldLabel: '说明',
             name: 'brief',
             bind: '{data.brief}'
@@ -44,13 +44,11 @@ Ext.define('Finetrust.view.organization.Detail', {
 
     initReadonly: function () {
         var me = this;
-        if (me.getReadonly()) {
-            me.items.defaults = {
-                readOnly: true
-            }
-        }
+        me.items.defaults = {
+            readOnly: me.getMode() === 'readonly'
+        };
 
         me.callParent();
     }
-    
+
 });

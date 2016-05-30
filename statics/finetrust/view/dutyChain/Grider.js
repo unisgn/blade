@@ -10,14 +10,13 @@ Ext.define('Finetrust.view.dutyChain.Grider', {
 
     requires: [
         'Finetrust.model.DutyChain',
-        'Finetrust.model.Duty',
         'Finetrust.view.EntityGrid'
     ],
 
 
     items: {
         xtype: 'entity-grid',
-        detailApp: 'Finetrust.app.DutyChainDetail',
+        app: 'Finetrust.app.DutyChain',
         store: {
             model: 'Finetrust.model.DutyChain',
             autoLoad: true

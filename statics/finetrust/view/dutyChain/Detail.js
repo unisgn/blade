@@ -43,6 +43,15 @@ Ext.define('Finetrust.view.dutyChain.Detail', {
             displayField: 'text',
             bind: '{data.members}'
         }]
+    },
+    
+    initReadonly: function () {
+        var me = this;
+        me.items.defaults = {
+            readOnly: me.getMode() === 'readonly'
+        };
+        
+        me.callParent();
     }
 
 });

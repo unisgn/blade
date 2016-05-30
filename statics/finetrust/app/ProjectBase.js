@@ -7,23 +7,23 @@ Ext.define('Finetrust.app.ProjectBase', {
 
     requires: [
         'Finetrust.model.Project',
-        'Finetrust.view.projectBase.BasicGrid',
-        'Finetrust.view.projectBase.Creator',
-        'Finetrust.view.projectBase.Updator',
+        'Finetrust.view.project.base.BasicGrid',
+        'Finetrust.view.project.base.Creator',
+        'Finetrust.view.project.base.Updator',
         'Finetrust.viewmodel.ProjectBase'
     ],
 
     inheritableStatics: {
         model: 'Finetrust.model.Project',
-        grid: 'Finetrust.view.projectBase.BasicGrid',
-        creator: 'Finetrust.view.projectBase.Creator',
-        updator: 'Finetrust.view.projectBase.Updator',
+        grid: 'Finetrust.view.project.base.BasicGrid',
+        creator: 'Finetrust.view.project.base.Creator',
+        updator: 'Finetrust.view.project.base.Updator',
 
         update_detail: function (id, mode) {
             var me = this;
             Ext.create(me.updator, {
                 viewModel: {
-                    type: 'projectbase',
+                    type: 'project_base',
                     links: {
                         data: {
                             type: me.model,

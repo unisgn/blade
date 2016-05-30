@@ -71,10 +71,7 @@
         /**
          * @type {Beaux.Application}
          */
-        app: undefined,
-
-
-        readonly: false
+        app: undefined
     },
 
     /**

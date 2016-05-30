@@ -20,13 +20,13 @@ Ext.define('Finetrust.app.Entity', {
         xwin_grid: undefined,
 
         detail: undefined,
-        
+        detailViewModel: undefined,
+
         creator: undefined,
         updator: undefined,
         reader: undefined,
-        
-        
-        
+
+
         launch: function (cfg) {
             var me = this, cfg = cfg || {};
             if ('id' in cfg || 'mode' in cfg) {
@@ -72,71 +72,77 @@ Ext.define('Finetrust.app.Entity', {
                 me.create_detail();
             }
         },
-        
+
         enter_detail: function (id, mode) {
             var me = this;
             if (me.detail) {
                 if (id) {
                     Ext.create(me.detail, {
-                        viewModel: Ext.create('Ext.app.ViewModel', {
+                        viewModel: {
+                            type: me.detailViewModel || 'default',
                             links: {
                                 data: {
                                     type: me.model,
                                     id: id
                                 }
                             }
-                        }),
+                        },
                         mode: mode,
                         app: Ext.getClassName(me)
                     }).show();
                 } else {
                     Ext.create(me.detail, {
-                        viewModel: Ext.create('Ext.app.ViewModel', {
+                        viewModel: {
+                            type: me.detailViewModel || 'default',
                             links: {
                                 data: {
                                     type: me.model,
                                     create: true
                                 }
                             }
-                        }),
+                        },
                         mode: 'create',
                         app: Ext.getClassName(me)
                     }).show();
                 }
+            } else {
+                console.warn('no detail class specified');
             }
         },
-        
+
         create_detail: function () {
             var me = this;
-            if (me.create) {
+            if (me.creator) {
                 Ext.create(me.creator, {
-                    viewModel: Ext.create('Ext.app.ViewModel', {
+                    viewModel: {
+                        type: me.detailViewModel || 'default',
                         links: {
                             data: {
                                 type: me.model,
                                 create: true
                             }
                         }
-                    }),
+                    },
                     app: Ext.getClassName(me)
                 }).show();
             } else {
                 me.enter_detail();
             }
         },
-        
+
         update_detail: function (id, mode) {
             var me = this;
             if (me.updator) {
                 Ext.create(me.updator, {
-                    viewModel: Ext.create('Ext.app.ViewModel', {
+                    viewModel: {
+                        type: me.detailViewModel || 'default',
                         links: {
                             data: {
                                 type: me.model,
                                 id: id
                             }
-                        } 
-                    }),
+                        }
+                    },
                     mode: mode,
                     app: Ext.getClassName(me)
                 }).show();
@@ -144,19 +150,20 @@ Ext.define('Finetrust.app.Entity', {
                 me.enter_detail(id, mode);
             }
         },
-        
+
         readonly_detail: function (id) {
             var me = this;
             if (me.reader) {
                 Ext.create(me.reader, {
-                    viewModel: Ext.create('Ext.app.ViewModel', {
+                    viewModel: {
+                        type: me.detailViewModel || 'default',
                         links: {
                             data: {
                                 type: me.model,
                                 id: id
                             }
                         }
-                    }),
+                    },
                     mode: 'readonly',
                     app: Ext.getClassName(me)
                 }).show();
@@ -166,7 +173,7 @@ Ext.define('Finetrust.app.Entity', {
                 me.enter_detail(id, 'readonly');
             }
         }
-        
+
     }
 
 

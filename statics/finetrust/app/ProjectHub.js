@@ -3,39 +3,25 @@
  */
 ;Ext.define('Finetrust.app.ProjectHub', {
     extend:'Beaux.Application',
-    
-    requires: [
-        'Finetrust.view.project.BasicGrid',
-        'Finetrust.view.project.EssentialGrid',
-        'Finetrust.view.project.OnlineGrid',
-        'Finetrust.view.project.OperatorsGrid',
-        'Finetrust.view.project.OperationGrid',
-        'Finetrust.view.project.AccountsGrid',
-        'Finetrust.view.project.SuperviseGrid',
-        'Finetrust.view.project.SuperviseJournalGrid',
-        'Finetrust.view.project.ArchiveGrid'
-    ],
+
     
     statics:{
         mapper: {
-            basic: 'Finetrust.view.project.BasicGrid',
-            essential: 'Finetrust.view.project.EssentialGrid',
-            online: 'Finetrust.view.project.OnlineGrid',
-            operators: 'Finetrust.view.project.OperatorsGrid',
-            operation: 'Finetrust.view.project.OperationGrid',
-            accounts: 'Finetrust.view.project.AccountsGrid',
-            supervise: 'Finetrust.view.project.SuperviseGrid',
-            supervise_journal: 'Finetrust.view.project.SuperviseJournalGrid',
-            archive: 'Finetrust.view.project.ArchiveGrid'
+            basic: 'Finetrust.app.ProjectBase',
+            essential: 'Finetrust.app.ProjectEssential',
+            online: 'Finetrust.app.ProjectOnline',
+            operators: 'Finetrust.app.ProjectOperators',
+            operation: 'Finetrust.app.ProjectOperation',
+            accounts: 'Finetrust.app.ProjectAccounts',
+            supervise: 'Finetrust.app.ProjectSupervise',
+            supervise_journal: 'Finetrust.app.ProjectSuperviseJournal',
+            archive: 'Finetrust.app.ProjectArchive'
 
         },
         launch: function (cfg) {
-            var mycfg = {
-                mode: 'basic'
-            }, me = this;
-            Ext.apply(mycfg, cfg);
+            var cfg = cfg || {}, me = this, mode = cfg.mode || 'basic';
 
-            me.mapper[mycfg.mode] && Ext.create(me.mapper[mycfg.mode]).show();
+            mode in me.mapper && Beaux.launch(me.mapper[mode]);
         }
     }
 

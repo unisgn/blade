@@ -7,13 +7,17 @@ from web import ctx
 import logging
 import functools
 from decorator import decorator
+import dbx
+import time
+
+import hashlib
 
 _authorities = {}
 _principals = {}
 
 _sessions = {}
 
-SESSION_Name = 'SECURED_SESSION'
+SESSION_Name = 'SPYSESSION'
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -50,9 +54,13 @@ class SecurityManager:
 security = SecurityManager()
 
 
+class SecurityException(Exception):
+    pass
 
 
 
+class AuthenticationException(SecurityException):
+    pass
 
 #
 # class AuthenticationProvider:
@@ -78,8 +86,37 @@ security = SecurityManager()
 #     pass
 #
 #
-# def authenticate():
-#     pass
+
+MAX_AGE = int(2*60*60)
+
+
+
+def authenticate(fn):
+    def d(*args, **kwargs):
+        username = ctx.request.form['username']
+        password = ctx.request.form['password']
+        user = dbx.redis.hgetall('user:%s' % username)
+        if user and user['password'] == password:
+            last_session_key = 'last_session:%s' % username
+            sessionid = dbx.redis.get(last_session_key)
+            if not sessionid:
+                sessionid = hashlib.sha1((username + password).encode()).hexdigest()
+            pipe = dbx.redis.pipeline()
+            session_key = 'secured_session:%s' % sessionid
+            pipe.hmset(session_key, user)
+            pipe.expire(session_key, MAX_AGE)
+            pipe.set(last_session_key, sessionid)
+            pipe.expire(last_session_key, MAX_AGE)
+            pipe.execute()
+            ctx.response.make_cookie(SESSION_Name, sessionid)
+            ctx.session['user'] = user
+            return fn(*args, **kwargs)
+        else:
+            raise AuthenticationException('authentication failed')
+    return d
+
+
+
 #
 #
 # def security_interceptor():
@@ -92,4 +129,3 @@ security = SecurityManager()
 #
 # class GrantedAuthority:
 #     pass
-

@@ -519,3 +519,36 @@ class AppDictItem(DistinctBase, PrimeBase):
     value = Column(String(64))
     text = Column(String(255))
     memo = Column(String(255))
+
+
+
+class Role(DistinctBase, PrimeBase):
+    id = Column(String, primary_key=True)
+    __mapper_args__ = {
+        'concrete': True,
+        'polymorphic_identity': 'Role'
+    }
+    code = Column(String)
+    memo = Column(Text)
+    permissions = relationship('RolePermissionHeader')
+
+
+class RolePermissionHeader(DistinctBase):
+    role_fk = Column(String, ForeignKey('role.id'), primary_key=True)
+    permission_fk = Column(String, ForeignKey('permission.id'), primary_key=True)
+
+    __mapper_args__ = {
+        'concrete': True,
+        'polymorphic_identity': 'RolePermissionHeader'
+    }
+
+
+
+class Permission(DistinctBase, PrimeBase):
+    id = Column(String, primary_key=True)
+    __mapper_args__ = {
+        'concrete': True,
+        'polymorphic_identity': 'Permission'
+    }
+    code = Column(String)
+    memo = Column(Text)

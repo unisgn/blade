@@ -4,7 +4,7 @@
 import mimetypes
 
 from web import ctx, route, restful, intercept, MultipartFile, static_file_generator
-from security import secured
+from security import secured, authenticate
 from dbx import open_session, open_conn
 from models import *
 import demjson
@@ -14,15 +14,19 @@ import uuid
 import os
 import time
 
+import util
+
 from urllib import parse
 
 
 
-@route('/login/<name>')
+@route('/login', method='post')
 @restful
-def login(name):
-    # ctx.response.header('Content-Type', 'text/plain;charset=utf-8')
-    return 'Nice Try, %s' % name
+@authenticate
+def login():
+    user = ctx.session['user']
+    print(user)
+    return user
 
 
 @route('/logout')
@@ -172,6 +176,7 @@ def add_project():
         vo = ctx.request.json
         po = Project()
         po.update_vo(vo)
+        po.number = util.next_project_no()
         s.add(po)
         s.commit()
         return po.__json__()
@@ -271,6 +276,39 @@ def update_project_supervise_issue(id, sid):
         if po:
             vo = ctx.request.json
             po.update_vo(vo)
+            s.add(po)
+            s.commit()
+            return po.__json__()
+
+
+
+@route('/api/ProjectEssential')
+@restful
+def get_project_essential_list():
+    with open_session() as s:
+        rs = s.query(Project).all()
+        return [e.__json__() for e in rs]
+
+
+@route('/api/ProjectEssential/<id>')
+@restful
+def get_project_essential(id):
+    with open_session() as s:
+        po = s.query(Project).filter(Project.id == id).one()
+        if po:
+            return po.__json__()
+
+
+@route('/api/ProjectEssential/<id>', method='put')
+@restful
+def update_project_essential(id):
+    with open_session() as s:
+        po = s.query(Project).filter(Project.id == id).one()
+        if po:
+            contract_no = po.contract_no
+            po.update_vo(ctx.request.json)
+            if not contract_no:
+                po.contract_no = util.next_project_contract_no()
             s.add(po)
             s.commit()
             return po.__json__()
@@ -586,7 +624,7 @@ def get_project_basic():
 
 @route('/api/data/project/essential')
 @restful
-def get_project_essential():
+def get_project_essential_data():
     with open_session() as s:
         rs = s.query(Project).all()
         return [e.__json__() for e in rs]

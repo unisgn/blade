@@ -4,7 +4,7 @@
 Ext.define('Finetrust.viewmodel.ProjectBase', {
     extend: 'Ext.app.ViewModel',
     
-    alias: 'viewmodel.projectbase',
+    alias: 'viewmodel.project_base',
 
     requires: [
         'Finetrust.data.MyRestProxy',
