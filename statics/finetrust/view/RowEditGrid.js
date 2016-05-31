@@ -16,7 +16,6 @@ Ext.define('Finetrust.view.RowEditGrid', {
 
     config: {
         readonly: false,
-        menus: Ext.create('Ext.util.HashMap')
     },
 
     plugins: [{

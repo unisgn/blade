@@ -12,17 +12,24 @@ Ext.define('Finetrust.view.InlineEditGrid', {
 
     // 3 line item height with header
     minHeight: 150,
-    
+
     viewConfig: {
         stripeRows: true
     },
-    
+
     forceFit: true,
 
 
     config: {
-        readonly: false, 
-        menus: Ext.create('Ext.util.HashMap')
+        readonly: false,
+        menus: undefined
+    },
+
+    initComponent: function () {
+        var me = this;
+        me.menus = Ext.create('Ext.util.HashMap');
+
+        me.callParent();
     },
 
     afterRender: function () {
@@ -131,10 +138,13 @@ Ext.define('Finetrust.view.InlineEditGrid', {
 
     onDestroy: function () {
         var me = this;
-        me.menus.each((k, v) => {
-            v.destroy();
-        });
-        me.menus.clear();
+        if (me.menus) {
+            me.menus.each((k, v) => {
+                v.destroy();
+            });
+            me.menus.clear();
+        }
+
         me.callParent();
     }
 });

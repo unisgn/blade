@@ -16,7 +16,14 @@ Ext.define('Finetrust.view.CellEditGrid', {
 
     config: {
         readonly: false,
-        menus: Ext.create('Ext.util.HashMap')
+        menus: undefined
+    },
+    
+    initComponent: function () {
+        var me = this;
+        me.menus = Ext.create('Ext.util.HashMap');
+        
+        me.callParent();
     },
 
     plugins: [{

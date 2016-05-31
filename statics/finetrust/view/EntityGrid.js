@@ -51,7 +51,7 @@
          * and remember to destroy all the menus after the component is destroyed
          * @type {Ext.util.HashMap}
          */
-        menus: Ext.create('Ext.util.HashMap'),
+        menus: undefined,
 
         /**
          * create an {@link Ext.KeyMap} for this component
@@ -72,6 +72,14 @@
          * @type {Beaux.Application}
          */
         app: undefined
+    },
+
+
+    initComponent: function () {
+        var me = this;
+        me.menus = Ext.create('Ext.util.HashMap');
+
+        me.callParent();
     },
 
     /**
@@ -173,7 +181,6 @@
     },
 
 
-
     afterRender: function () {
         var me = this, readonly = !!me.readonly;
 
@@ -201,7 +208,7 @@
                 });
             }
         }
-        
+
         me.callParent(arguments);
     },
 
@@ -209,10 +216,13 @@
         var me = this;
         me.keymap && me.keymap.destroy();
 
-        me.menus.each((key, val) => {
-            val.destroy();
-        });
-        me.menus.clear();
+        if (me.menus) {
+            me.menus.each((key, val) => {
+                val.destroy();
+            });
+            me.menus.clear();
+        }
+
 
         Ext.destroy(me.queryPanel);
 

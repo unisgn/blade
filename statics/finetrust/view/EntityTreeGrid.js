@@ -23,7 +23,7 @@
     },
 
     rootVisible: false,
-    
+
     forceFit: true,
 
     viewConfig: {
@@ -42,13 +42,20 @@
          * and remember to destroy all the menus after the component is destroyed
          * @type {Ext.util.HashMap}
          */
-        menus: Ext.create('Ext.util.HashMap'),
-        
+        menus: undefined,
+
         app: undefined
     },
-    
 
-    getSingleSelection: function() {
+
+    initComponent: function () {
+        var me = this;
+        me.menus = Ext.create('Ext.util.HashMap');
+
+        me.callParent();
+    },
+
+    getSingleSelection: function () {
         return this.getSelection()[0];
     },
 
@@ -94,7 +101,7 @@
             }
             return menu;
         }
-        
+
     },
 
     getContainerContextMenu: function () {
@@ -132,11 +139,16 @@
      */
     onDestroy: function () {
         var me = this;
-        me.menus.each((key, val) => {
-            val.destroy();
-        });
-        
-        me.menus.clear();
+        if (me.menus) {
+            me.menus.each((key, val) => {
+                val.destroy();
+            });
+
+            me.menus.clear();
+        }
+
+
+
 
         me.callParent(arguments);
     }
