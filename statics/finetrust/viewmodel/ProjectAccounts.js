@@ -18,7 +18,7 @@ Ext.define('Finetrust.viewmodel.ProjectAccounts', {
             autoSync: true,
             proxy: {
                 type: 'my-rest',
-                url: '../api/Project/{data.id}/accounts'
+                url: '/api/Project/{data.id}/accounts'
             }
         }
     }

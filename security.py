@@ -3,13 +3,13 @@
 """
 
 import threading
-from web import ctx
+from web import ctx, restful
 import logging
 import functools
 from decorator import decorator
 import dbx
 import time
-
+import demjson
 import hashlib
 
 _authorities = {}
@@ -42,13 +42,23 @@ class SecurityManager:
         pass
 
     def make_decision(self, fn):
-        pass
+        role_expr = getattr(fn, '__secured_role__', None)
+        if role_expr:
+            required_roles = role_expr.split(',')
+            principal = ctx.session.get('user')
+            if principal:
+                granted_roles = dbx.redis.smembers('user_permissions#%s' % principal['username'])
+                for r in required_roles:
+                    if r not in granted_roles:
+                        raise SecurityException('permission: %s are required' % ','.join(required_roles))
+            else:
+                raise SecurityException('login required')
 
     def get_principal(self):
         pass
 
     def register_interceptor(self, fn, role_expr):
-        pass
+        fn.__secured_role__ = role_expr
 
 
 security = SecurityManager()
@@ -61,6 +71,47 @@ class SecurityException(Exception):
 
 class AuthenticationException(SecurityException):
     pass
+
+
+base_url = '/api'
+
+
+# @intercept(base_url)
+def secured_session(nxt):
+    sessionid = ctx.request.cookie(SESSION_Name)
+    if not sessionid:
+        if ctx.session.get('user'):
+            del ctx.session['user']
+        return demjson.encode({
+            'success': False,
+            'msg': 'login required'
+        })
+    else:
+        session_key = 'secured_session:%s' % sessionid
+        principal = dbx.redis.hgetall(session_key)
+        now = int(time.time())
+        if not principal:
+            if ctx.session.get('user'):
+                del ctx.session['user']
+            return demjson.encode({
+                'success': False,
+                'msg': 'session expired, login required'
+            })
+        principal.update({
+            'last_active': now
+        })
+        ctx.session['user'] = principal
+        last_session_key = 'last_session:%s' % principal['username']
+        pipe = dbx.redis.pipeline()
+        pipe.multi()
+        pipe.hset(session_key, 'last_active', now)
+        pipe.expire(session_key, MAX_AGE)
+        pipe.expire(last_session_key, MAX_AGE)
+        pipe.execute()
+        ctx.response.make_cookie(SESSION_Name, sessionid, expires=MAX_AGE)
+    rv = nxt()
+    del ctx.session['user']
+    return rv
 
 #
 # class AuthenticationProvider:
@@ -103,15 +154,21 @@ def authenticate(fn):
                 sessionid = hashlib.sha1((username + password).encode()).hexdigest()
             pipe = dbx.redis.pipeline()
             session_key = 'secured_session:%s' % sessionid
+            now = int(time.time())
+            user.update({
+                'login_time': now,
+                'last_active': now
+            })
             pipe.hmset(session_key, user)
             pipe.expire(session_key, MAX_AGE)
             pipe.set(last_session_key, sessionid)
             pipe.expire(last_session_key, MAX_AGE)
             pipe.execute()
-            ctx.response.make_cookie(SESSION_Name, sessionid)
+            ctx.response.make_cookie(SESSION_Name, sessionid, expires=MAX_AGE)
             ctx.session['user'] = user
             return fn(*args, **kwargs)
         else:
+            ctx.response.del_cookie(SESSION_Name)
             raise AuthenticationException('authentication failed')
     return d
 

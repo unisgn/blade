@@ -22,7 +22,7 @@ Ext.define('Finetrust.view.organization.Grid', {
             parentIdProperty: 'parent_id',
             proxy: {
                 type: 'my-ajax',
-                url: '../api/tree/Organization'
+                url: '/api/tree/Organization'
             }
         },
 

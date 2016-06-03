@@ -17,7 +17,7 @@ Ext.define('Finetrust.viewmodel.ProjectSupervise', {
             autoLoad: true,
             proxy: {
                 type: 'my-rest',
-                url: '../api/Project/{data.id}/supervise_issues'
+                url: '/api/Project/{data.id}/supervise_issues'
             }
         }
     }

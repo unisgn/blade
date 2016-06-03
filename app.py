@@ -3,18 +3,28 @@
 __author__ = 'yinlan'
 
 
-from web import WSGI
+from web import WSGI, intercept
 
 import routes
 
 
-from dbx import engine
+from dbx import engine, session_in_view
 from models import Base
+from security import secured_session
 Base.metadata.create_all(engine)
 
-wsgi = WSGI()
+intercept(session_in_view, '/api')
+
+
+wsgi = WSGI(debug=True)
 
 app = None
+
+
+
+
+
+
 
 if __name__ == '__main__':
     wsgi.run('0.0.0.0')

@@ -130,7 +130,7 @@
     d.init_remote_dict = callback => {
         new Promise(function (resolve, reject) {
             Ext.Ajax.request({
-                url: '../api/data/pull_app_dict',
+                url: '/api/data/pull_app_dict',
                 success: resp => {
                     resolve(resp);
                 },

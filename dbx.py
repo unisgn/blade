@@ -2,28 +2,29 @@
 # Created by 0xFranCiS on May 10, 2016.
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from contextlib import contextmanager
-from redis import StrictRedis
-
+from redis import StrictRedis, ConnectionPool
 
 engine = create_engine('postgresql://postgres:postgres@localhost/finetrust', echo=True)
 # engine = create_engine('sqlite://')
 
-Session = sessionmaker(bind=engine)
+session_factory = sessionmaker(bind=engine)
+
+Session = scoped_session(session_factory)
 
 
 @contextmanager
 def open_session():
-    session = Session()
+    s = session_factory()
     try:
-        yield session
-        session.commit()
+        yield s
+        s.commit()
     except:
-        session.rollback()
+        s.rollback()
         raise
     finally:
-        session.close()
+        s.close()
 
 
 def open_conn():
@@ -52,6 +53,24 @@ def db2redis_user():
                 'alias': r[5]
             })
             pipe.sadd(id_name, r[0])
+            sql = 'SELECT p.code FROM user_permission_header t, permission p WHERE t.permission_fk = p.id AND t.user_fk =%s;'
+            cur = conn.execute(sql, r[0])
+            rrs = cur.fetchall()
+            if rrs:
+                pipe.delete('user_permissions#%s' % r[0])
+                pipe.sadd('user_permissions#%s' % r[0], *[e[0] for e in rrs])
         pipe.execute()
 
+# db2redis_user()
 
+
+def session_in_view(nxt):
+    try:
+        rv = nxt()
+        Session.commit()
+    except:
+        Session.rollback()
+        raise
+    finally:
+        Session.remove()
+    return rv

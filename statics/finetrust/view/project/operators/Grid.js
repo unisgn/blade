@@ -22,7 +22,7 @@ Ext.define('Finetrust.view.project.operators.Grid', {
             model: 'Finetrust.model.Project',
             autoLoad: true,
             proxy: {
-                url: '../api/data/project/operators',
+                url: '/api/data/project/operators',
                 type: 'ajax',
                 reader: {
                     rootProperty: 'data',

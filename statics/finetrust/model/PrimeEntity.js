@@ -21,7 +21,7 @@ Ext.define('Finetrust.model.PrimeEntity', {
         namespace: 'Finetrust.model',
         proxy:{
             type:'rest',
-            url:'../api/{entityName}',
+            url:'/api/{entityName}',
             // format: 'json',
             reader:{
                 type:'my-json'

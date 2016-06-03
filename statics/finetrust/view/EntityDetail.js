@@ -17,6 +17,10 @@ Ext.define('Finetrust.view.EntityDetail', {
     ],
 
     controller: 'entity-detail',
+    
+    MODE_READONLY: 'readonly',
+    MODE_UPDATE: 'update',
+    MODE_CREATE: 'create',
 
     config: {
         mode: 'readonly',

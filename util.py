@@ -11,7 +11,7 @@ import functools
 
 def encode_value(obj):
     try:
-        return obj.__json__()
+        return obj._asdict()
     except AttributeError:
         raise demjson.JSONEncodeError('can not encode object into a JSON representation', obj)
 
@@ -33,7 +33,7 @@ def date_seq_next(key_seq, prefix, datefmt='%Y%m%d', digits=4):
     key_date = key_seq + '_date'
     cli = dbx.redis
     today = datetime.datetime.today()
-    today_date_lock = today.strftime('%Y%m%d').encode()
+    today_date_lock = today.strftime('%Y%m%d')
     date_lock = cli.get(key_date)
     if date_lock != today_date_lock:
         cli.set(key_date, today_date_lock)
@@ -41,3 +41,16 @@ def date_seq_next(key_seq, prefix, datefmt='%Y%m%d', digits=4):
     nxt = cli.incr(key_seq)
     fmt = '%%s%%s#%%0%sd' % digits
     return fmt % (prefix, today.strftime(datefmt), int(nxt))
+
+
+# print(next_project_no())
+
+
+class ChainDict(dict):
+
+    def update(self, e=None, **kwargs):
+        if e:
+            super(ChainDict, self).update(e, **kwargs)
+        else:
+            super(ChainDict, self).update(**kwargs)
+        return self

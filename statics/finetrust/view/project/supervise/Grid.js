@@ -20,7 +20,7 @@ Ext.define('Finetrust.view.project.supervise.Grid', {
             model: 'Finetrust.model.Project',
             autoLoad: true,
             proxy: {
-                url: '../api/data/project/supervise',
+                url: '/api/data/project/supervise',
                 type:'my-ajax'
             }
         },

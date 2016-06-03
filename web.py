@@ -210,10 +210,13 @@ class Response:
             key = name
         self._headers[key] = val
 
-    def make_cookie(self, name, val, expires='', path='/', domain=''):
+    def make_cookie(self, name, val, expires=0, path='/', domain=''):
         val = val.replace(';', '')
         if expires:
-            expires = 'expires=%s; ' % expires
+            if isinstance(expires, int):
+                expires = 'expires=%s; ' % _getdate(expires)
+            elif isinstance(expires, str):
+                expires = 'expires=%s; ' % expires
         if domain:
             domain = 'Domain=%s; ' % domain
         self._cookies[name] = '%s;%s%s path=%s' % (val, domain, expires, path)
@@ -437,14 +440,8 @@ class Interceptor:
         self.interceptor = fn
 
 
-def intercept(pattern='/'):
-    def d(fn):
-        _router.register_interceptor(Interceptor(pattern, fn))
-
-        def dd(*args, **kwargs):
-            return fn(*args, **kwargs)
-        return dd
-    return d
+def intercept(interceptor, pattern='/'):
+    _router.register_interceptor(Interceptor(pattern, interceptor))
 
 
 ctx = threading.local()
@@ -479,6 +476,8 @@ class WSGI:
                 r = router.dispatch()
                 if isinstance(r, str):
                     r = [r.encode()]
+                elif isinstance(r, bytes):
+                    r = [r]
                 if not r:
                     r = []
                 start_response(resp.status, resp.headers)
@@ -510,7 +509,7 @@ class WSGI:
                 del ctx.session
         return wsgi
 
-    def run(self, host='', port=8000):
+    def run(self, host='', port=8085):
         from wsgiref.simple_server import make_server
 
         # httpd = make_server(host, port, self.get_wsgi())

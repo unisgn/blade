@@ -6,6 +6,10 @@ class BusinessException(Exception):
     pass
 
 
+class EntityNotFound(BusinessException):
+    pass
+
+
 class SecurityException(BusinessException):
     pass
 

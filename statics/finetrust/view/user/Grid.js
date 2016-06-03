@@ -12,9 +12,13 @@ Ext.define('Finetrust.view.user.Grid', {
         'Ext.form.field.ComboBox',
         'Ext.form.field.Text',
         'Ext.grid.column.Date',
+        'Finetrust.data.MyRestProxy',
+        'Finetrust.model.Role',
         'Finetrust.model.User',
         'Finetrust.view.EntityGrid',
-        'Finetrust.view.user.QueryPanel'
+        'Finetrust.view.user.PermissionTree',
+        'Finetrust.view.user.QueryPanel',
+        'Finetrust.view.user.RoleGrid'
     ],
 
     viewModel: {
@@ -105,6 +109,62 @@ Ext.define('Finetrust.view.user.Grid', {
         xtype: 'datecolumn',
         format: 'Y-m-d H:i:s'
     }],
+    
+    
+    
+    getItemContextMenu: function () {
+        var me = this,
+            menuId = 'item',
+            menu, readonly = !!me.readonly;
+
+        if (!readonly) {
+            if (!me.menus.get(menuId)) {
+                menu = Ext.create('Ext.menu.Menu', {
+                    items: [{
+                        text: '查看',
+                        handler: 'on_menu_view',
+                        scope: me.getController()
+                    },{
+                        text: '查看权限',
+                        handler: me.on_menu_view_permission,
+                        scope: me
+                    }, {
+                        text: '编辑',
+                        handler: 'on_menu_edit',
+                        scope: me.getController()
+                    },{
+                        text: '分配角色',
+                        handler: me.on_menu_assign_role,
+                        scope: me
+                    }, {
+                        text: '删除',
+                        handler: 'on_menu_remove',
+                        scope: me.getController()
+                    }, {
+                        xtype: 'menuseparator'
+                    }, {
+                        text: '新建',
+                        handler: 'on_menu_new',
+                        scope: me.getController()
+                    }, {
+                        text: '刷新',
+                        handler: 'on_menu_refresh',
+                        scope: me.getController()
+                    }, {
+                        text: '同步',
+                        handler: 'on_menu_sync',
+                        scope: me.getController()
+                    }]
+                });
+                me.menus.add(menuId, menu);
+            } else {
+                menu = me.menus.get(menuId);
+            }
+            return menu;
+        }
+
+    },
+
 
     createQueryPanel: function () {
         return Ext.create('Finetrust.view.user.QueryPanel');
@@ -112,6 +172,47 @@ Ext.define('Finetrust.view.user.Grid', {
 
     createInlineCriteria: function () {
 
+    },
+    
+    
+    on_menu_assign_role: function () {
+        var me = this,
+            rec = me.getSelection()[0];
+        if (rec) {
+            Ext.create('Finetrust.view.user.RoleGrid', {
+                 viewModel: {
+                     data: {
+                         data: rec
+                     },
+                     stores: {
+                         roles: {
+                             model: 'Finetrust.model.Role',
+                             proxy: {
+                                 type: 'my-rest',
+                                 url: '/api/User/' + rec.getId() + '/role'
+                             },
+                             autoLoad: true,
+                             autoSync: true
+                         }
+                     }
+                 }
+            }).show();
+        }
+    },
+    
+    
+    on_menu_view_permission: function () {
+        var me = this,
+            rec = me.getSelection()[0];
+        if (rec) {
+            Ext.create('Finetrust.view.user.PermissionTree', {
+                 viewModel: {
+                     data: {
+                         data: rec
+                     }
+                 }
+            }).show();
+        }
     }
 
 });

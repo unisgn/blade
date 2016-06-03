@@ -23,7 +23,7 @@ Ext.define('Finetrust.view.project.essential.Grid', {
             model: 'Finetrust.model.ProjectEssential',
             autoLoad: true,
             // proxy: {
-            //     url: '../api/data/project/essential',
+            //     url: '/api/data/project/essential',
             //     type:'ajax',
             //     reader: {
             //         rootProperty: 'data',

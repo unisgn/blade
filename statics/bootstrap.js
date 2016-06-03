@@ -44,10 +44,19 @@ Ext.onReady(function () {
                 let data = resp.responseText;
                 // pre test with regular expression, for performance consideration
                 if (_false_reg.test(data)) {
-                    if (!_true_reg.test(data)) {
-                        //further test via json decode, here ignored
+                    data = Ext.JSON.decode(data);
+                    let ok = data['success'];
+                    if (!ok) {
+                        Beaux.notify(data['msg']);
                         console.warn('restful protocol failure detected');
+                        console.warn(data['traceback']);
                     }
+
+                    // if (!_true_reg.test(data)) {
+                    //     //further test via json decode, here ignored
+                    //
+                    //
+                    // }
 
                 }
             }

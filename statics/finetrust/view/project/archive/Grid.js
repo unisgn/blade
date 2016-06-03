@@ -21,7 +21,7 @@ Ext.define('Finetrust.view.project.archive.Grid', {
             model: 'Finetrust.model.Project',
             autoLoad: true,
             proxy: {
-                url: '../api/data/project/archive',
+                url: '/api/data/project/archive',
                 type: 'ajax',
                 reader: {
                     rootProperty: 'data',

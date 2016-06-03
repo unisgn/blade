@@ -26,7 +26,7 @@ Ext.define('Finetrust.view.productCategory.Grider', {
             parentIdProperty: 'parent_id',
             proxy: {
                 type: 'my-ajax',
-                url: '../api/tree/ProductCategory'
+                url: '/api/tree/ProductCategory'
             }
         },
 
