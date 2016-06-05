@@ -25,14 +25,14 @@ Ext.define('Finetrust.view.productCategory.Detail', {
         items: [{
             xtype: 'combobox',
             fieldLabel: 'Parent',
-            name: 'parent_id',
+            name: 'parent_fk',
             store: Finetrust.data.Dict.dictstore('root_product_category'),
             queryMode: 'local',
             anyMatch: true,
             valueField: 'value',
             displayField: 'text',
             bind: {
-                value: '{data.parent_id}'
+                value: '{data.parent_fk}'
             }
         }, {
             fieldLabel: 'code',

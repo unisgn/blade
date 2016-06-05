@@ -23,18 +23,21 @@ Ext.define('Finetrust.view.permission.Detail', {
         defaultType: 'textfield',
         items: [{
             fieldLabel: '上级目录',
-            name: 'parentId',
+            name: 'parent_fk',
             xtype: 'combobox',
             store: Finetrust.data.Dict.dictstore('permission_parent'),
             queryMode: 'local',
             anyMatch: true,
             valueField: 'value',
             displayField: 'text',
-            bind: '{data.parentId}'
+            bind: '{data.parent_fk}'
         }, {
             fieldLabel: '代码',
             name: 'code',
             bind: '{data.code}'
+        }, {
+            fieldLabel: '名称',
+            bind: '{data.name}'
         }, {
             fieldLabel: '说明',
             xtype: 'textarea',

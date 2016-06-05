@@ -7,6 +7,7 @@ Ext.define('Finetrust.model.Organization', {
     fields: [
         {name: 'code', type: 'string'},
         {name: 'name', type: 'string'},
-        {name: 'brief', type: 'string'}
+        {name: 'brief', type: 'string'},
+        {name: 'parent_fk', type: 'string'}
     ]
 });

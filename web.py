@@ -252,7 +252,7 @@ class Routine:
     _RE_URL_PATTERN = re.compile(r'<([a-zA-Z_]\w*)>')
 
     def __init__(self, url_expr, method, handler):
-        self.url_expr = url_expr.rstrip('/')
+        self.url_expr = url_expr.rstrip('/')  # type: str
         self.method = method.upper()
         self.handler = handler
         self.url_variables = self._parse_path_variables(url_expr)
@@ -284,10 +284,10 @@ class Router:
             'DELETE': {}
         }
         self.dynamics = {
-            'GET': [],
-            'POST': [],
-            'PUT': [],
-            'DELETE': []
+            'GET': {},
+            'POST': {},
+            'PUT': {},
+            'DELETE': {}
         }
         self.inspectors = []
 
@@ -306,22 +306,36 @@ class Router:
     def _dispatch(self):
         request = ctx.request
         method = request.method.upper()
-        path = request.path
+        path = request.path  # type:str
         handler = args = None
         if self._is_file(path):
             path = os.path.join(self.web_root, path.lstrip('/'))
             if os.path.isfile(path):
                 handler, args = static_file_handler(path), None
         else:
-            routine = self.statics[method].get(path)
+            routine = self.statics[method].get(path)  # type:Routine
             if routine:
                 handler = routine.handler
-            if not handler:
-                for routine in self.dynamics[method]:
-                    variables = routine.match(path)
-                    if variables:
-                        handler, args = routine.handler, variables
-                        break
+            else:
+                hub = self.dynamics[method]
+                if hub is not None:
+                    root = path.rstrip('/')
+                    find = False
+                    while 1:
+                        ridx = root.rfind('/')
+                        if ridx < 1:
+                            break
+                        root = root[:ridx]
+                        stub = hub.get(root)
+                        if stub:
+                            for r in stub:  # type: Routine
+                                variables = r.match(path)
+                                if variables:
+                                    handler, args = r.handler, variables
+                                    find = True
+                                    break
+                            if find:
+                                break
         if handler:
             if args:
                 return handler(*args)
@@ -332,7 +346,13 @@ class Router:
 
     def register(self, routine):
         if routine.url_variables:
-            self.dynamics[routine.method].append(routine)
+            url = routine.url_expr
+            root = routine.url_expr[:url.index('<')-1]
+            hub = self.dynamics[routine.method].get(root)  # type: list
+            if hub:
+                hub.append(routine)
+            else:
+                self.dynamics[routine.method][root] = [routine]
         else:
             self.statics[routine.method][routine.url_expr] = routine
         logger.info('<Router>: registered %s %s to handler %s' %
@@ -345,7 +365,7 @@ class Router:
     def _intercept(interceptor, nxt):
         def wrapper():
             if isinstance(interceptor, Interceptor) \
-                    and ctx.request.path.startswith(interceptor.pattern):
+                    and interceptor.pattern.match(ctx.request.path):
                 return interceptor.interceptor(nxt)
             else:
                 return nxt()
@@ -436,8 +456,9 @@ def route(path, method='get'):
 
 class Interceptor:
     def __init__(self, pattern, fn):
-        self.pattern = pattern
+        self.pattern = re.compile(pattern)
         self.interceptor = fn
+        self.pattern_expr = pattern
 
 
 def intercept(interceptor, pattern='/'):
@@ -459,18 +480,9 @@ class WSGI:
 
         def wsgi(environ, start_response):
             global ctx
-            session = None
             req = ctx.request = Request(environ)
             resp = ctx.response = Response()
-            sessionid = req.cookie(SESSION_NAME)
-            if sessionid:
-                session = ctx.session = _sessions.get(sessionid)
-            if session is None:
-                sessionid = str(uuid.uuid1())
-                resp.make_cookie(SESSION_NAME, sessionid)
-                session = {}
-                _sessions[sessionid] = session
-                ctx.session = session
+            ctx.session = {}
 
             try:
                 r = router.dispatch()

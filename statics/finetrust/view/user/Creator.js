@@ -1,19 +1,19 @@
 /**
- * Created by 0xFranCiS on May 09, 2016.
+ * Created by 0xFranCiS on Jun 04, 2016.
  */
-Ext.define('Finetrust.view.user.Detail', {
-    extend: 'Finetrust.view.EntityDetail',
+Ext.define('Finetrust.view.user.Creator', {
+    extend: 'Finetrust.view.EntityCreator',
 
     requires: [
         'Ext.form.Panel'
     ],
 
-    controller: 'entity-detail',
-
+    controller: 'entity-creator',
+    
     bind: {
         title: '用户@{data.id}'
     },
-
+    
 
     items: {
         xtype: 'form',
@@ -24,6 +24,10 @@ Ext.define('Finetrust.view.user.Detail', {
             name: 'id',
             bind: '{data.id}'
         }, {
+            fieldLabel: '密码',
+            name: 'password',
+            bind: '{data.password}'
+        }, {
             fieldLabel: '机构',
             name: 'org_fk',
             xtype: 'combobox',
@@ -33,19 +37,6 @@ Ext.define('Finetrust.view.user.Detail', {
             anyMatch: true,
             queryMode: 'local',
             bind: '{data.org_fk}'
-        }, {
-            fieldLabel: '姓名',
-            name: 'id',
-            bind: '{data.name}'
-        }, {
-            fieldLabel: '别名',
-            name: 'id',
-            bind: '{data.alias}'
-        }, {
-            fieldLabel: '备注',
-            name: 'memo',
-            bind: '{data.memo}'
-
         }]
     },
 
@@ -54,9 +45,7 @@ Ext.define('Finetrust.view.user.Detail', {
         me.items.defaults = {
             readOnly: me.getMode() === 'readonly'
         };
-
+        
         me.callParent(arguments);
-    }
-
-
+    } 
 });

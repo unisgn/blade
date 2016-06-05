@@ -19,7 +19,7 @@ Ext.define('Finetrust.view.organization.Grid', {
         store: {
             model: 'Finetrust.model.Organization',
             autoLoad: true,
-            parentIdProperty: 'parent_id',
+            parentIdProperty: 'parent_fk',
             proxy: {
                 type: 'my-ajax',
                 url: '/api/tree/Organization'

@@ -11,7 +11,9 @@ import demjson
 
 from sqlalchemy import text, select, func
 from sqlalchemy.sql import select, and_, or_, not_, label, func as sqlfn
-
+from sqlalchemy.orm import load_only
+from sqlalchemy.util import Properties
+import hashlib
 import uuid
 import os
 import time
@@ -68,7 +70,7 @@ def parse_criteria(query):
 
 @route('/api/User')
 @restful
-# @secured('user_read')
+@secured('user_read')
 def get_users():
     return Session.query(User).order_by(User.id.asc()).all()
 
@@ -77,7 +79,9 @@ def get_users():
 @restful
 # @secured('user_write')
 def add_user():
-    return User().update_vo(**ctx.request.json).save()
+    vo = ctx.request.json  # type: dict
+
+    return User().update_vo(**vo).set_passwd().save()
 
 
 @route('/api/User/<pk>')
@@ -104,44 +108,35 @@ def remove_user(pk):
 @route('/api/User/<pk>/role')
 @restful
 def get_user_role_list(pk):
-    return User.load_roles(pk)
+    hdr = aliased(UserRoleHeader)
+    rv = Session.query(*inspect(Role).c, case([(hdr.role_fk.is_(None), False)], else_=True).label('checked')) \
+        .outerjoin(hdr, (hdr.role_fk == Role.id) & (hdr.user_fk == pk)).all()
+    return rv
 
 
 @route('/api/User/<pk>/permission')
 @restful
 def get_user_permission_list(pk):
-    return User.load_permissions(pk)
+    start = Session.query(Permission) \
+        .join(RolePermissionHeader, Permission.id == RolePermissionHeader.permission_fk)\
+        .join(UserRoleHeader, RolePermissionHeader.role_fk == UserRoleHeader.role_fk) \
+        .filter(UserRoleHeader.user_fk == pk) \
+        .group_by(Permission.id).cte(recursive=True)
+    nested = start.union(Session.query(Permission)
+                         .filter(Permission.id == start.c.parent_fk))
+    return Session.query(*nested.c, label('expanded', text('True'))).all()
 
 
 @route('/api/User/<pk>/role/<spk>', method='put')
 @restful
 def update_user_role(pk, spk):
-    with open_session() as s:
-        vo = ctx.request.json
-        role_id = vo['id']
-        checked = vo['checked']
-        if checked:
-            po = UserRoleHeader()
-            po.role_fk = role_id
-            po.user_fk = pk
-            s.add(po)
-            permissions = s.query(RolePermissionHeader.permission_fk).filter(RolePermissionHeader.role_fk == role_id).all()
-            redis.sadd('user_permissions:%s' % pk, *[r[0] for r in permissions])
-        else:
-            po = s.query(UserRoleHeader).filter(UserRoleHeader.role_fk == role_id, UserRoleHeader.user_fk == pk).one()
-            stmt = '''
-            SELECT rp.permission_fk from role_permission_header rp
-            WHERE rp.role_fk =:role_fk
-            EXCEPT
-            SELECT rp.permission_fk FROM role_permission_header rp, user_role_header ur
-            WHERE rp.role_fk=ur.role_fk AND ur.user_fk=:user_fk AND rp.role_fk !=:role_fk
-            '''
-            rs = s.execute(text(stmt), **{'role_fk': role_id, 'user_fk': pk})
-            to_remove = [r[0] for r in rs]
-            s.delete(po)
-            redis.srem('user_permissions:%s' % pk, *to_remove)
-
-        return vo
+    vo = ctx.request.json
+    checked = vo['checked']
+    if checked:
+        User.add_role(pk, spk)
+    else:
+        User.remove_role(pk, spk)
+    return vo
 
 
 @route('/api/ProductCategory')
@@ -445,46 +440,19 @@ def update_duty_chain(pk):
 @restful
 def add_organization():
     vo = ctx.request.json
-    po = Organization()
-    with open_session() as s:
-        parent_id = vo.get('parent_id', None)
-        if parent_id:
-            parent = s.query(Organization).filter(Organization.id == parent_id).one()
-            po.parent = parent
-        else:
-            po.parent = None
-        po.update_vo(**vo)
-        s.add(po)
-        parent = po.parent
-        po.parent = parent
-        s.add(po)
-        s.commit()
-        return po._asdict()
+    return Organization().update_vo(**vo).save()
 
 
-@route('/api/Organization/<id>', method='put')
+@route('/api/Organization/<pk>', method='put')
 @restful
-def update_organization(id):
-    with open_session() as s:
-        po = s.query(Organization).filter(Organization.id == id).one()
-        if po:
-            vo = ctx.request.json
-            parent_id = vo.get('parent_id', None)
-            parent = s.query(Organization).filter(Organization.id == parent_id).one_or_none()
-            po.parent = parent
-            po.update_vo(**vo)
-            s.add(po)
-            s.commit()
-            return po._asdict()
+def update_organization(pk):
+    return Organization.load(pk).update_vo(**ctx.request.json).save()
 
 
-@route('/api/Organization/<id>')
+@route('/api/Organization/<pk>')
 @restful
-def get_organization(id):
-    with open_session() as s:
-        po = s.query(Organization).filter(Organization.id == id).one_or_none()
-        if po:
-            return po._asdict()
+def get_organization(pk):
+    return Organization.load(pk)
 
 
 @route('/api/ProjectPreAccount')
@@ -765,13 +733,13 @@ def pull_app_dict():
     s = Session
     rs = s.query(Duty.id, Duty.name).all()
     update_dict('duty', rs)
-    rs = s.query(ProductCategory.id, ProductCategory.name).filter(ProductCategory.parent_id.is_(None)).all()
+    rs = s.query(ProductCategory.id, ProductCategory.name).order_by(ProductCategory.name.asc()).filter(ProductCategory.parent_fk.is_(None)).all()
     update_dict('root_product_category', rs)
-    rs = s.query(Organization.id, Organization.name).all()
+    rs = s.query(Organization.id, Organization.name).order_by(Organization.name.asc()).all()
     update_dict('organization', rs)
-    rs = s.query(User.username, User.name).all()
+    rs = s.query(User.id, User.name).order_by(User.name.asc()).all()
     update_dict('user', rs)
-    rs = s.query(Permission.id, Permission.code).all()
+    rs = s.query(Permission.id, Permission.name).order_by(Permission.name.asc()).all()
     update_dict('permission_parent', rs)
     return rv
 
@@ -824,11 +792,20 @@ def update_role(pk):
 def get_role_permission_tree(pk):
     checked = ctx.request.args['checked']
     if checked == '1':
-        rs = Role.load_permissions(pk, checked=True)
-        return [r[0]._asdict().update(checked=r[1]) for r in rs]
+        header = aliased(RolePermissionHeader)
+        return Session.query(*inspect(Permission).c,
+                             case([(header.role_fk.is_(None), False)], else_=True).label('checked')) \
+            .outerjoin(header, (header.permission_fk == Permission.id) & (header.role_fk == pk)) \
+            .all()
     else:
-        rs = Role.load_permissions(pk, False)
-        return [r[0]._asdict().update(expanded=True) for r in rs]
+        start = Session.query(Permission) \
+            .join(RolePermissionHeader) \
+            .filter(RolePermissionHeader.role_fk == pk) \
+            .group_by(Permission.id) \
+            .cte(recursive=True)
+        nested = start.union(Session.query(Permission)
+                             .filter(Permission.id == start.c.parent_fk))
+        return Session.query(*nested.c, label('expanded', text('True'))).all()
 
 
 @route('/api/Role/<pk>/permission', method='post')
@@ -837,7 +814,6 @@ def update_role_permission(pk):
     vo = ctx.request.json
     permissions = vo['permissions']
     if permissions:
-        permissions = permissions.split(',')
         Session.query(RolePermissionHeader).filter(RolePermissionHeader.role_fk == pk).delete(synchronize_session=False)
         Session.bulk_insert_mappings(RolePermissionHeader, [{'role_fk': pk, 'permission_fk': e} for e in permissions])
 
@@ -845,9 +821,7 @@ def update_role_permission(pk):
 @route('/api/Permission')
 @restful
 def get_permission_list():
-    with open_session() as s:
-        rs = s.query(Permission).all()
-        return [e._asdict() for e in rs]
+    return Session.query(Permission).all()
 
 
 @route('/api/Permission/<pk>')

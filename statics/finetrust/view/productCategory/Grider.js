@@ -23,7 +23,7 @@ Ext.define('Finetrust.view.productCategory.Grider', {
             model: 'Finetrust.model.ProductCategory',
             autoLoad: true,
 
-            parentIdProperty: 'parent_id',
+            parentIdProperty: 'parent_fk',
             proxy: {
                 type: 'my-ajax',
                 url: '/api/tree/ProductCategory'

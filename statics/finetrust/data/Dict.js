@@ -150,7 +150,7 @@
         });
     };
 
-    d.init_remote_dict();
+    // d.init_remote_dict();
 
     // TODO: only need to update remote fetched dict
     function update_storemanager_cache() {

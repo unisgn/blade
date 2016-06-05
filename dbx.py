@@ -64,7 +64,7 @@ def db2redis_user():
 # db2redis_user()
 
 
-def session_in_view(nxt):
+def lazy_session(nxt):
     try:
         rv = nxt()
         Session.commit()

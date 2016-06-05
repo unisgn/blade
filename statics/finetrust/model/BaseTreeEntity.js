@@ -6,6 +6,7 @@ Ext.define('Finetrust.model.BaseTreeEntity', {
 
     
     fields:[
-        {name: 'leaf', type: 'boolean', defaultValue: false, persist: false}
+        {name: 'leaf', type: 'boolean', defaultValue: false, persist: false},
+        {name: 'parent_fk', type: 'string', allowNull: true}
     ]
 });

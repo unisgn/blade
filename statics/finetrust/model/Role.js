@@ -6,7 +6,8 @@ Ext.define('Finetrust.model.Role', {
     
     fields: [
         {name: 'code', type: 'string'},
-        {name: 'flag', type: 'string', persist: false},
+        {name: 'name', type: 'string'},
+        {name: 'flag', type: 'string'},
         {name: 'memo', type: 'string'}
     ]
     

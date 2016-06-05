@@ -16,17 +16,18 @@ Ext.define('Finetrust.view.organization.Detail', {
 
     items: {
         xtype: 'form',
+        bodyPadding: 5,
         defaultType: 'textfield',
         items: [{
             fieldLabel: '上级机构',
-            name: 'parent_id',
+            name: 'parent_fk',
             xtype: 'combobox',
             store: Finetrust.data.Dict.dictstore('organization'),
             anyMatch: true,
             queryMode: 'local',
             valueField: 'value',
             displayField: 'text',
-            bind: '{data.parent_id}'
+            bind: '{data.parent_fk}'
         }, {
             fieldLabel: '机构名',
             name: 'name',

@@ -42,14 +42,16 @@ Ext.define('Finetrust.view.role.Updator', {
             mode = me.getMode(),
             store = Ext.create('Ext.data.TreeStore', {
                 model: mode === 'update' ? 'Finetrust.model.CheckedPermission' : 'Finetrust.model.Permission',
-                parentIdProperty: 'parentId',
+                parentIdProperty: 'parent_fk',
                 proxy: {
                     url: '/api/Role/' + roleId + '/permission',
                     type: 'my-ajax',
                     extraParams: {
                         checked: mode == 'update' ? '1' : '0'
                     }
-                }
+                },
+                sorters: 'code',
+                remoteSort: false
             }), panel = Ext.create('Ext.tree.Panel', {
 
                 forceFit: true,
@@ -69,8 +71,11 @@ Ext.define('Finetrust.view.role.Updator', {
 
                 columns: [{
                     xtype: 'treecolumn',
-                    text: '编号',
+                    text: '代号',
                     dataIndex: 'code'
+                }, {
+                    text: '名称',
+                    dataIndex: 'name'
                 }, {
                     text: '说明',
                     dataIndex: 'memo'
@@ -86,9 +91,12 @@ Ext.define('Finetrust.view.role.Updator', {
                     readOnly: mode == 'readonly'
                 },
                 items: [{
-                    fieldLabel: '代码',
+                    fieldLabel: '代号',
                     name: 'code',
                     bind: '{data.code}'
+                }, {
+                    fieldLabel: '名称',
+                    bind: '{data.name}'
                 }, {
                     fieldLabel: '说明',
                     xtype: 'textarea',

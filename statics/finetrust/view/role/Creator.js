@@ -16,11 +16,15 @@ Ext.define('Finetrust.view.role.Creator', {
 
     items: [{
         xtype: 'form',
+        bodyPadding: 5,
         defaultType: 'textfield',
         items: [{
             fieldLabel: '代码',
             name: 'code',
             bind: '{data.code}'
+        }, {
+            fieldLabel: '名称',
+            bind: '{data.name}'
         }, {
             fieldLabel: '说明',
             xtype: 'textarea',

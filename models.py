@@ -11,8 +11,8 @@ from sqlalchemy.inspection import inspect
 from enum import Enum
 import time
 from excepts import *
-
-from dbx import Session
+import hashlib
+from dbx import Session, redis
 
 from util import ChainDict
 
@@ -68,6 +68,7 @@ class VoidEntity:
         for k, v in kwargs.items():
             if hasattr(self, k):
                 setattr(self, k, v)
+        return self
 
     @classmethod
     def load(cls, pk):
@@ -202,56 +203,65 @@ class NodeIface:
         return Session.query(cls).filter(cls.parent_fk == node).all()
 
 
-###############################
-# preferred order for subclass: XXXEntity, Mixin, AbsBase
-#
-# END helper class, super class, mixed class
-#
-#############################
-#
-# BEGIN business entity
-#
-############################
-
-
 class User(VersionEntity, AuditIface, FakeBase):
     __tablename__ = 't_user'
     password = Column(String)
     alias = Column(String)
     name = Column(String)
     org_fk = Column(String)
+    memo = Column(String)
+
+    OPWD = '898989'
+    SALT = '9iOl*$K'
 
     @hybrid_property
     def username(self):
         return self.id
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        if 'name' not in kwargs:
-            self.name = kwargs['id']
+    def save(self):
+        """
 
-    def update_vo(self, **kwargs):
-        super().update_vo(**kwargs)
-        if 'name' not in kwargs:
-            self.name = self.id
+        :rtype: User
+        """
+        super().save()
+        redis.hmset('user:%s' % self.id, self._asdict())
         return self
 
     @staticmethod
-    def load_roles(user_pk):
-        hdr = aliased(UserRoleHeader)
-        rv = Session.query(*inspect(Role).c, case([(hdr.role_fk.is_(None), False)], else_=True).label('checked')) \
-            .outerjoin(hdr, (hdr.role_fk == Role.id) & (hdr.user_fk == user_pk)).all()
-        return rv
+    def add_role(user_fk, role_fk):
+        po = UserRoleHeader(user_fk=user_fk, role_fk=role_fk)
+        Session.add(po)
+        permits = Session.query(Permission.id).\
+            join(RolePermissionHeader).\
+            filter(RolePermissionHeader.role_fk == role_fk).all()
+        if permits:
+            redis.sadd('user_permits:%s' % user_fk, *[e[0] for e in permits])
 
     @staticmethod
-    def load_permissions(user_pk):
-        start = Session.query(Permission) \
-            .join(RolePermissionHeader, UserRoleHeader) \
-            .filter(UserRoleHeader.user_fk == user_pk)\
-            .group_by(Permission.id).cte(recursive=True)
-        nested = start.union(Session.query(Permission)
-                             .filter(Permission.id == start.c.parent_fk))
-        return Session.query(*nested.c, label('expanded', text('True'))).all()
+    def remove_role(user_fk, role_fk):
+        po = Session.query(UserRoleHeader)\
+            .filter(UserRoleHeader.user_fk == user_fk, UserRoleHeader.role_fk == role_fk).one()
+        q1 = Session.query(Permission.id)\
+            .join(RolePermissionHeader)\
+            .filter(RolePermissionHeader.role_fk == role_fk)
+        q2 = Session.query(Permission.id).join(RolePermissionHeader, UserRoleHeader)\
+            .filter(UserRoleHeader.user_fk == user_fk, RolePermissionHeader.role_fk != role_fk)
+        to_remove = q1.except_(q2).all()
+        if to_remove:
+            redis.srem('user_permits:%s' % user_fk, *[e[0] for e in to_remove])
+        Session.delete(po)
+
+    def digest_passwd(self):
+        msg = self.id + ':' + self.password + ':' + User.SALT
+        self.password = str(hashlib.md5(msg.encode()).hexdigest())
+        return self
+
+    def set_passwd(self, passwd=None):
+        if not passwd:
+            passwd = User.OPWD
+        self.password = passwd
+        self.digest_passwd()
+        return self
 
 
 class Duty(VersionEntity, FakeBase):
@@ -563,7 +573,7 @@ class ProductCategory(VersionEntity, FakeBase):
             if cnt <= 1:
                 old_parent.leaf = True
                 Session.add(old_parent)
-        super(ProductCategory, self).erase()
+        super().erase()
 
     def update_vo(self, **kwargs):
         """
@@ -585,7 +595,8 @@ class Organization(VersionEntity, NodeIface, FakeBase):
 
     def save(self):
         self._update_leaf()
-        super(Organization, self).save()
+        super().save()
+        return self
 
 
 class Attachment(FakeBase, PrimeEntity):
@@ -598,7 +609,7 @@ class Attachment(FakeBase, PrimeEntity):
     upload_by = Column(String)
 
     def __init__(self, *args, **kwargs):
-        super(Attachment, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.upload_date = int(time.time()*1000)
 
     @staticmethod
@@ -610,7 +621,7 @@ class Attachment(FakeBase, PrimeEntity):
         :return:
         """
         return Session.query(Attachment.id, Attachment.fkid, Attachment.fname, Attachment.upload_date)\
-            .filter(Attachment.fkid == fkid).all()
+            .filter(Attachment.fkid == fkid).order_by(Attachment.upload_date.desc()).all()
 
 
 class ActivityLog:
@@ -640,27 +651,10 @@ class Role(FakeBase, PrimeEntity):
 
     code = Column(String, unique=True, nullable=False)
     memo = Column(Text)
+    name = Column(String)
     flag = Column(String(10))
 
     permissions = relationship('RolePermissionHeader')
-
-    @staticmethod
-    def load_permissions(pk, checked=False):
-        if checked:
-            header = aliased(RolePermissionHeader)
-            return Session.query(*inspect(Permission).c,
-                                 case([(header.role_fk.is_(None), False)], else_=True).label('checked')) \
-                .outerjoin(header, (header.permission_fk == Permission.id) & (header.role_fk == pk)) \
-                .all()
-        else:
-            start = Session.query(Permission)\
-                .join(RolePermissionHeader)\
-                .filter(RolePermissionHeader.role_fk == pk)\
-                .group_by(Permission.id)\
-                .cte(recursive=True)
-            nested = start.union(Session.query(Permission)
-                                 .filter(Permission.id == start.c.parent_fk))
-            return Session.query(*nested.c, label('expanded', text('True'))).all()
 
 
 class UserRoleHeader(VoidEntity, FakeBase):
@@ -669,18 +663,26 @@ class UserRoleHeader(VoidEntity, FakeBase):
     role_fk = Column(String, ForeignKey('role.id'), primary_key=True)
 
 
-class Permission(NodeIface, FakeBase, PrimeEntity):
+class Permission(PrimeEntity, NodeIface, FakeBase):
 
     code = Column(String, unique=True, nullable=False)
+    name = Column(String)
     memo = Column(Text)
     parent_fk = Column(String, ForeignKey('permission.id'))
 
     def save(self):
         self._update_leaf()
-        return super().save()
+        super().save()
+        return self
 
 
 class RolePermissionHeader(VoidEntity, FakeBase):
     role_fk = Column(String, ForeignKey('role.id'), primary_key=True)
     permission_fk = Column(String, ForeignKey('permission.id'), primary_key=True)
 
+
+#############################
+# END: business/domain entity
+############################
+# BEGIN: listeners
+############################

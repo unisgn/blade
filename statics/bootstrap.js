@@ -66,7 +66,7 @@ Ext.onReady(function () {
 
     // TODO: hack the {Ext.data.reader.Reader} to handle global {success:false} event
 
-    Beaux.setDisplayManager(null);
+    Beaux.setDisplayManager(Beaux.login.LoginMgr);
     Beaux.setDesktopManager(Beaux.desktop.Desktop);
     Beaux.boot();
 

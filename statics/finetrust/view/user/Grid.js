@@ -98,16 +98,13 @@ Ext.define('Finetrust.view.user.Grid', {
 
     columns: [{
         text: '用户名',
-        dataIndex: 'username'
+        dataIndex: 'id'
     }, {
-        text: '所属机构',
-        dataIndex: 'password'
+        text: '姓名',
+        dataIndex: 'name'
     }, {
-        text: '岗位',
-        width: 180,
-        dataIndex: 'last_modified_date',
-        xtype: 'datecolumn',
-        format: 'Y-m-d H:i:s'
+        text: '机构',
+        dataIndex: 'org_fk'
     }],
     
     
@@ -124,22 +121,22 @@ Ext.define('Finetrust.view.user.Grid', {
                         text: '查看',
                         handler: 'on_menu_view',
                         scope: me.getController()
-                    },{
-                        text: '查看权限',
-                        handler: me.on_menu_view_permission,
-                        scope: me
                     }, {
                         text: '编辑',
                         handler: 'on_menu_edit',
                         scope: me.getController()
-                    },{
-                        text: '分配角色',
-                        handler: me.on_menu_assign_role,
-                        scope: me
                     }, {
                         text: '删除',
                         handler: 'on_menu_remove',
                         scope: me.getController()
+                    },{
+                        text: '查看权限',
+                        handler: me.on_menu_view_permission,
+                        scope: me
+                    },{
+                        text: '分配角色',
+                        handler: me.on_menu_assign_role,
+                        scope: me
                     }, {
                         xtype: 'menuseparator'
                     }, {

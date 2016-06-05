@@ -15,16 +15,16 @@ Ext.define('Finetrust.view.user.PermissionTree', {
     ],
 
     bind: {
-        title: '用户@{data.username} -> 所有权限'
+        title: '用户@{data.id} -> 所有权限'
     },
 
 
     initComponent: function () {
         var me = this,
-            username = me.getViewModel().get('data.username'),
+            username = me.getViewModel().get('data.id'),
             store = Ext.create('Ext.data.TreeStore', {
                 model: 'Finetrust.model.Permission',
-                parentIdProperty: 'parentId',
+                parentIdProperty: 'parent_fk',
                 proxy: {
                     url: '/api/User/' + username + '/permission',
                     type: 'my-ajax'
@@ -45,8 +45,11 @@ Ext.define('Finetrust.view.user.PermissionTree', {
 
                 columns: [{
                     xtype: 'treecolumn',
-                    text: '编号',
+                    text: '代号',
                     dataIndex: 'code'
+                }, {
+                    text: '名称',
+                    dataIndex: 'name'
                 }, {
                     text: '说明',
                     dataIndex: 'memo'

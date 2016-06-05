@@ -32,17 +32,21 @@ Ext.define('Finetrust.view.permission.Grid', {
         store: {
             model: 'Finetrust.model.Permission',
             autoLoad: true,
-            parentIdProperty: 'parentId',
+            parentIdProperty: 'parent_fk',
             autoSync: true,
             proxy: {
                 type: 'my-ajax',
                 url: '/api/tree/Permission'
-            }
+            },
+            sorters: 'name'
         },
         columns: [{
             xtype: 'treecolumn',
             text: '代码',
             dataIndex: 'code'
+        }, {
+            text: '名称',
+            dataIndex: 'name'
         }, {
             text: '说明',
             dataIndex: 'memo'
